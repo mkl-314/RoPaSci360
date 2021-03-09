@@ -27,6 +27,7 @@ def do_turns(data):
 
         new_upper_tokens = []
         
+        # tokens need to talk to each other
         new_r_upper_tokens, s_defeated_tokens = do_tokens_turn(turn, game_board, r_upper_tokens, s_lower_tokens)
         new_p_upper_tokens, r_defeated_tokens = do_tokens_turn(turn, game_board, p_upper_tokens, r_lower_tokens)
         new_s_upper_tokens, p_defeated_tokens = do_tokens_turn(turn, game_board, s_upper_tokens, p_lower_tokens)
