@@ -133,19 +133,3 @@ def bfs(game_board, upper_token, lower_token):
     return distance, list(path[-1])
 
 
-def do_action(turn, upper_token, new_upper_token):
-
-    if is_hex_next_to():
-        print_slide(turn, upper_token[1], upper_token[2], new_upper_token[1], new_upper_token[2])
-    else:
-        print_swing(turn, upper_token[1], upper_token[2], new_upper_token[1], new_upper_token[2])
-
-def is_hex_next_to():
-    return True
-
-def adjacent_hexes(token):
-    pass
-
-
-def viable_moves(token):
-    pass
