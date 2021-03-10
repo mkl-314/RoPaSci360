@@ -1,10 +1,12 @@
 from util import print_board
 
 class GameBoard(object):
+    BLOCK = "#"
 
     def __init__(self, data):
         self.data = data
         self.board_dict = self.format_file(data)
+        self.upper_occupied_hexes = []
     
     def format_file(self, data):
         board_dict = {}
@@ -19,9 +21,12 @@ class GameBoard(object):
                 elif token == "lower":
                     board_dict[hex] += pos[0].lower()
                 else:
-                    board_dict[hex] = "#"
+                    board_dict[hex] = self.BLOCK
                 
         return board_dict
+
+    # def append_upper_occupied_hex(self, hex):
+    #     self.upper_occupied_hexes.append(hex)
 
     def print(self):
         print_board(self.board_dict)
