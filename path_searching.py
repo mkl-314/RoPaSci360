@@ -111,14 +111,20 @@ def bfs(game_board, upper_token, lower_token):
         
         if current.r == lower_token.r and current.q == lower_token.q:
             break
-
-        for next in current.viable_actions(game_board, next_action):
-            if tuple(next) not in flood:
-
-                next_token = Token([current.symbol] + next, True)
-                queue.insert(0, next_token)
-                flood[tuple(next)] = (current.r, current.q)
         
+        viable_actions = current.viable_actions(game_board, next_action)
+
+        # Token is trapped so stay in place
+        if len(viable_actions) == 0 and next_action:
+            return 0, [(upper_token.r, upper_token.q)]
+        else:
+            for next in viable_actions:
+                if tuple(next) not in flood:
+
+                    next_token = Token([current.symbol] + next, True)
+                    queue.insert(0, next_token)
+                    flood[tuple(next)] = (current.r, current.q)
+ 
         next_action = False
             
     distance = 0
