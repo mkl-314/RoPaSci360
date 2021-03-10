@@ -22,21 +22,8 @@ def do_turns(data):
     
     while len(lower_tokens) > 0 and turn <= 20:
 
-        # r_lower_tokens, p_lower_tokens, s_lower_tokens = separate_tokens(lower_tokens) 
-        # r_upper_tokens, p_upper_tokens, s_upper_tokens = separate_tokens(upper_tokens)
-        
         # TODO tokens need to talk to each other
-        # new_r_upper_tokens, s_defeated_tokens = do_tokens_turn(turn, game_board, r_upper_tokens, s_lower_tokens)
-        # new_p_upper_tokens, r_defeated_tokens = do_tokens_turn(turn, game_board, p_upper_tokens, r_lower_tokens)
-        # new_s_upper_tokens, p_defeated_tokens = do_tokens_turn(turn, game_board, s_upper_tokens, p_lower_tokens)
-
-        # new_upper_tokens = new_r_upper_tokens + new_p_upper_tokens + new_s_upper_tokens
-        # defeated_tokens = s_defeated_tokens + r_defeated_tokens + p_defeated_tokens
-
-        upper_tokens, defeated_tokens = do_tokens_turn(turn, game_board, upper_tokens, lower_tokens)
-    
-        for defeated_token in defeated_tokens:
-            lower_tokens.remove(defeated_token)
+        upper_tokens = do_tokens_turn(turn, game_board, upper_tokens, lower_tokens)
 
         new_data = {}
         new_data["upper"] = upper_tokens
@@ -50,7 +37,6 @@ def do_turns(data):
 
 def do_tokens_turn(turn, game_board, upper_tokens, lower_tokens):
     new_upper_tokens = []
-    all_defeated_tokens = []
 
     r_lower_tokens, p_lower_tokens, s_lower_tokens = separate_tokens(lower_tokens) 
     upper_defeats = {"r": s_lower_tokens, "s": p_lower_tokens, "p": r_lower_tokens}
@@ -61,9 +47,11 @@ def do_tokens_turn(turn, game_board, upper_tokens, lower_tokens):
         new_upper_token, defeated_tokens = do_token_turn(turn, upper_token, upper_defeats[upper_token.symbol], game_board)
 
         new_upper_tokens.append(new_upper_token)
-        all_defeated_tokens += defeated_tokens
 
-    return new_upper_tokens, all_defeated_tokens
+        for defeated_token in defeated_tokens:
+            lower_tokens.remove(defeated_token)
+
+    return new_upper_tokens
 
 def do_token_turn(turn, upper_token, lower_tokens, game_board):
     defeated_tokens = []

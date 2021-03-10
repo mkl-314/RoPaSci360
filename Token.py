@@ -6,7 +6,6 @@ class Token(object):
     possible_neighbours = [ [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0] ]
     token_defeats = ["r", "s", "p"]
     
-
     def __init__ (self, token, upper_player):
         self.symbol = token[0]
         self.r = token[1]

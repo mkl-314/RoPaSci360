@@ -25,8 +25,5 @@ class GameBoard(object):
                 
         return board_dict
 
-    # def append_upper_occupied_hex(self, hex):
-    #     self.upper_occupied_hexes.append(hex)
-
     def print(self):
         print_board(self.board_dict)
