@@ -13,7 +13,6 @@ import json
 # inside the `search` directory (like this one and `util.py`) and
 # then import from them like this:
 from util import print_board, print_slide, print_swing
-#from part_A_searching import *
 from path_searching import *
 
 def main():
@@ -26,15 +25,5 @@ def main():
 
         print("usage: python3 -m search path/to/input.json", file=sys.stderr)
         #sys.exit(1)
-    
-    #board_dict = format_file(data)
-
-    #print_board(board_dict)
 
     do_turns(data)
-    # TODO:
-    # Find and print a solution to the board configuration described
-    # by `data`.
-    # Why not start by trying to print this configuration out using the
-    # `print_board` helper function? (See the `util.py` source code for
-    # usage information).

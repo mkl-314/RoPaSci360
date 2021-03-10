@@ -22,23 +22,8 @@ def do_turns(data):
     
     while len(lower_tokens) > 0 and turn <= 20:
 
-        r_lower_tokens, p_lower_tokens, s_lower_tokens = separate_tokens(lower_tokens) 
-        r_upper_tokens, p_upper_tokens, s_upper_tokens = separate_tokens(upper_tokens)
-
-        new_upper_tokens = []
-        
-        new_r_upper_tokens, s_defeated_tokens = do_tokens_turn(turn, game_board, r_upper_tokens, s_lower_tokens)
-        new_p_upper_tokens, r_defeated_tokens = do_tokens_turn(turn, game_board, p_upper_tokens, r_lower_tokens)
-        new_s_upper_tokens, p_defeated_tokens = do_tokens_turn(turn, game_board, s_upper_tokens, p_lower_tokens)
-
-        new_upper_tokens = new_r_upper_tokens + new_p_upper_tokens + new_s_upper_tokens
-        defeated_tokens = s_defeated_tokens + r_defeated_tokens + p_defeated_tokens
-
-        for defeated_token in defeated_tokens:
-            lower_tokens.remove(defeated_token)
-
-        turn += 1
-        upper_tokens = new_upper_tokens 
+        # TODO tokens need to talk to each other
+        upper_tokens = do_tokens_turn(turn, game_board, upper_tokens, lower_tokens)
 
         new_data = {}
         new_data["upper"] = upper_tokens
@@ -48,43 +33,56 @@ def do_turns(data):
         game_board = GameBoard(new_data)
         game_board.print()
 
+        turn += 1
+
 def do_tokens_turn(turn, game_board, upper_tokens, lower_tokens):
     new_upper_tokens = []
-    defeated_token_pos = []
 
-    for upper_token in upper_tokens:
-        u_token = Token(upper_token, True)
-        if len(lower_tokens) > 0:
-            min_distance = -1
-            for lower_token in lower_tokens:
-                l_token = Token(lower_token, False)
-                distance, next_hex = bfs(game_board, u_token, l_token)
+    r_lower_tokens, p_lower_tokens, s_lower_tokens = separate_tokens(lower_tokens) 
+    upper_defeats = {"r": s_lower_tokens, "s": p_lower_tokens, "p": r_lower_tokens}
 
-                if distance < min_distance or min_distance == -1:
-                    num_tokens = 1
-                    min_distance = distance
-                    min_lower_token = lower_token
-                    min_next_hex = next_hex
-                # note two of the same tokens on one hex
-                elif min_lower_token == lower_token:
-                    num_tokens += 1
-            
-            u_token.do_action(turn, min_next_hex)
+    for upper in upper_tokens:
+        upper_token = Token(upper, True)
+        
+        new_upper_token, defeated_tokens = do_token_turn(turn, upper_token, upper_defeats[upper_token.symbol], game_board)
 
-            new_upper_tokens.append(u_token.convert_to_list())
+        new_upper_tokens.append(new_upper_token)
 
-            # Remove all deleted tokens
-            if min_next_hex == min_lower_token[1:]:
-                for i in range(num_tokens):
-                    defeated_token_pos.append(min_lower_token)
-        else:
-            u_token.do_action(turn, [u_token.r, u_token.q])
-            new_upper_tokens.append(upper_token)
+        for defeated_token in defeated_tokens:
+            lower_tokens.remove(defeated_token)
 
-    return new_upper_tokens, defeated_token_pos
+    return new_upper_tokens
 
+def do_token_turn(turn, upper_token, lower_tokens, game_board):
+    defeated_tokens = []
 
+    if len(lower_tokens) > 0:
+        min_distance = -1
+        for lower_token in lower_tokens:
+            l_token = Token(lower_token, False)
+            distance, path = bfs(game_board, upper_token, l_token)
 
+            if distance < min_distance or min_distance == -1:
+                num_tokens = 1
+                min_distance = distance
+                min_lower_token = lower_token
+                new_hex = list(path[0])
+            # note two of the same tokens on one hex
+            elif min_lower_token == lower_token:
+                num_tokens += 1
+
+        # Remove all deleted tokens
+        if new_hex == min_lower_token[1:]:
+            for i in range(num_tokens):
+                defeated_tokens.append(min_lower_token)
+    else:
+        # TODO Find other hexes to swing move
+        new_hex = [upper_token.r, upper_token.q]
+
+    upper_token.do_action(turn, new_hex)
+    game_board.upper_occupied_hexes.append(new_hex)
+
+    return upper_token.convert_to_list(), defeated_tokens
 
 def separate_tokens(tokens):
     r_tokens = []
@@ -106,30 +104,39 @@ def bfs(game_board, upper_token, lower_token):
     queue = []
     queue.append(upper_token)
     flood = {}    
+    next_action = True
 
     while len(queue) > 0:
         current = queue.pop()
         
         if current.r == lower_token.r and current.q == lower_token.q:
             break
+        
+        viable_actions = current.viable_actions(game_board, next_action)
 
-        for next in current.viable_actions(game_board):
-            if not tuple(next) in flood:
+        # Token is trapped so stay in place
+        if len(viable_actions) == 0 and next_action:
+            return 0, [(upper_token.r, upper_token.q)]
+        else:
+            for next in viable_actions:
+                if tuple(next) not in flood:
 
-                next_token = Token([current.symbol] + next, True)
-                queue.insert(0, next_token)
-                flood[tuple(next)] = (current.r, current.q)
+                    next_token = Token([current.symbol] + next, True)
+                    queue.insert(0, next_token)
+                    flood[tuple(next)] = (current.r, current.q)
+ 
+        next_action = False
             
     distance = 0
     path = []
-
     current_hex = (current.r, current.q)
 
     while current_hex != (upper_token.r, upper_token.q):
         path.append(current_hex)
         current_hex = flood[current_hex]
         distance += 1
-        
-    return distance, list(path[-1])
+    path.reverse()
+
+    return distance, path
 
 
