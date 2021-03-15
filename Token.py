@@ -1,4 +1,4 @@
-from util import *
+from search.util import print_slide, print_swing
 import math
 
 class Token(object):
