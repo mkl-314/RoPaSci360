@@ -1,13 +1,12 @@
 import sys
-from util import print_board, print_slide, print_swing
-from Token import Token
-from GameBoard import GameBoard
+from search.util import print_board, print_slide, print_swing
+from search.Token import Token
+from search.GameBoard import GameBoard
 
 '''
 bfs function derived from
 https://www.redblobgames.com/pathfinding/a-star/introduction.html
 '''
-
 
 def do_turns(data):
     game_board = GameBoard(data)
@@ -20,15 +19,12 @@ def do_turns(data):
     
     turn = 1
     
-    while len(lower_tokens) > 0 and turn <= 20:
+    while len(lower_tokens) > 0 and turn <= 360:
 
         # TODO tokens need to talk to each other
         upper_tokens = do_tokens_turn(turn, game_board, upper_tokens, lower_tokens)
 
-        new_data = {}
-        new_data["upper"] = upper_tokens
-        new_data["lower"] = lower_tokens
-        new_data["block"] = block_tokens
+        new_data = {"upper": upper_tokens, "lower": lower_tokens, "block": block_tokens}
 
         game_board = GameBoard(new_data)
         game_board.print()
@@ -77,27 +73,14 @@ def do_token_turn(turn, upper_token, lower_tokens, game_board):
                 defeated_tokens.append(min_lower_token)
     else:
         # TODO Find other hexes to swing move
-        new_hex = [upper_token.r, upper_token.q]
+        # Get viable moves and move there
+        viable_actions = upper_token.viable_actions(game_board, 1)
+        new_hex = viable_actions[0]
 
     upper_token.do_action(turn, new_hex)
     game_board.upper_occupied_hexes.append(new_hex)
 
     return upper_token.convert_to_list(), defeated_tokens
-
-def separate_tokens(tokens):
-    r_tokens = []
-    p_tokens = []
-    s_tokens= []
-
-    for token in tokens:
-        if token[0] == "r":
-            r_tokens.append(token)
-        elif token[0] == "p":
-            p_tokens.append(token)
-        elif token[0] == "s":
-            s_tokens.append(token)  
-    
-    return r_tokens, p_tokens, s_tokens
 
 def bfs(game_board, upper_token, lower_token):
 
@@ -115,6 +98,7 @@ def bfs(game_board, upper_token, lower_token):
         viable_actions = current.viable_actions(game_board, next_action)
 
         # Token is trapped so stay in place
+        # Token should always be able to move
         if len(viable_actions) == 0 and next_action:
             return 0, [(upper_token.r, upper_token.q)]
         else:
@@ -140,3 +124,17 @@ def bfs(game_board, upper_token, lower_token):
     return distance, path
 
 
+def separate_tokens(tokens):
+    r_tokens = []
+    p_tokens = []
+    s_tokens= []
+
+    for token in tokens:
+        if token[0] == "r":
+            r_tokens.append(token)
+        elif token[0] == "p":
+            p_tokens.append(token)
+        elif token[0] == "s":
+            s_tokens.append(token)  
+    
+    return r_tokens, p_tokens, s_tokens
