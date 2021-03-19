@@ -56,6 +56,8 @@ def do_token_turn(turn, upper_token, lower_tokens, game_board):
         min_distance = -1
         for lower_token in lower_tokens:
             l_token = Token(lower_token, False)
+            # Tim's heuristic test
+            # print("heuristic distance to", (lower_token), heuristic(upper_token, l_token))
             distance, path = bfs(game_board, upper_token, l_token)
 
             if distance < min_distance or min_distance == -1:
@@ -138,3 +140,16 @@ def separate_tokens(tokens):
             s_tokens.append(token)  
     
     return r_tokens, p_tokens, s_tokens
+
+'''
+Heursitic algorithm to find hex distance between two tokens
+'''
+def heuristic(token1, token2):
+    # Difference in row (negative)
+    x = -token1.r + token2.r
+    # Difference in column
+    y = token1.q - token2.q
+    # Difference of differences
+    d = x - y
+    # Highest absolute is distance
+    return max(abs(x) ,abs(y) ,abs(d))
