@@ -71,8 +71,9 @@ def do_token_turn(turn, upper_token, lower_tokens, game_board):
 
         # Remove all deleted tokens
         if new_hex == min_lower_token[1:]:
-            for i in range(num_tokens):
+            while num_tokens > 0:
                 defeated_tokens.append(min_lower_token)
+                num_tokens -= 1
     else:
         # TODO Find other hexes to swing move
         # Get viable moves and move there
