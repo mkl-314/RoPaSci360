@@ -63,7 +63,7 @@ class Token(object):
                         if token.defeated_by not in hex_tokens:
                             viable_hexes.append(hex)
                     
-                        if next_action:
+                        if next_action and self == token:
                             if not hex_tokens.islower():
                                 swing_hexes.append(hex)
                 # empty hex
