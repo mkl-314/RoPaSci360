@@ -1,7 +1,7 @@
 import sys
-from util import print_board, print_slide, print_swing
-from Token import Token
-from GameBoard import GameBoard
+from search.util import print_board, print_slide, print_swing
+from search.Token import Token
+from search.GameBoard import GameBoard
 
 '''
 bfs function derived from
