@@ -1,4 +1,4 @@
-from search.util import print_board
+from util import print_board
 
 class GameBoard(object):
     BLOCK = "#"
@@ -7,6 +7,12 @@ class GameBoard(object):
         self.data = data
         self.board_dict = self.format_file(data)
         self.upper_occupied_hexes = []
+
+        self.upper_tokens = {}
+        self.upper_tokens["r"], self.upper_tokens["p"], self.upper_tokens["s"] = self.separate_tokens(data["upper"]) 
+        self.r_lower_tokens, self.p_lower_tokens, self.s_lower_tokens = self.separate_tokens(data["lower"]) 
+    
+        self.upper_defeats = {"r": self.s_lower_tokens, "s": self.p_lower_tokens, "p": self.r_lower_tokens}
     
     def format_file(self, data):
         board_dict = {}
@@ -25,5 +31,21 @@ class GameBoard(object):
                 
         return board_dict
 
+    def separate_tokens(self, tokens):
+        r_tokens = []
+        p_tokens = []
+        s_tokens= []
+
+        for token in tokens:
+            if token[0] == "r":
+                r_tokens.append(token)
+            elif token[0] == "p":
+                p_tokens.append(token)
+            elif token[0] == "s":
+                s_tokens.append(token)  
+        
+        return r_tokens, p_tokens, s_tokens
+
     def print(self):
         print_board(self.board_dict)
+

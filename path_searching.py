@@ -1,7 +1,7 @@
 import sys
-from search.util import print_board, print_slide, print_swing
-from search.Token import Token
-from search.GameBoard import GameBoard
+from util import print_board, print_slide, print_swing
+from Token import Token
+from GameBoard import GameBoard
 
 '''
 bfs function derived from
@@ -34,13 +34,10 @@ def do_turns(data):
 def do_tokens_turn(turn, game_board, upper_tokens, lower_tokens):
     new_upper_tokens = []
 
-    r_lower_tokens, p_lower_tokens, s_lower_tokens = separate_tokens(lower_tokens) 
-    upper_defeats = {"r": s_lower_tokens, "s": p_lower_tokens, "p": r_lower_tokens}
-
     for upper in upper_tokens:
         upper_token = Token(upper, True)
         
-        new_upper_token, defeated_tokens = do_token_turn(turn, upper_token, upper_defeats[upper_token.symbol], game_board)
+        new_upper_token, defeated_tokens = do_token_turn(turn, upper_token, game_board.upper_defeats[upper_token.symbol], game_board)
 
         new_upper_tokens.append(new_upper_token)
 
@@ -78,10 +75,17 @@ def do_token_turn(turn, upper_token, lower_tokens, game_board):
         # TODO Find other hexes to swing move
         # Get viable moves and move there
         viable_actions = upper_token.viable_actions(game_board, 1)
-        new_hex = viable_actions[0]
+        # commit suicide if no viable moves
+        if len(viable_actions) == 0:
+            for hex in upper_token.neighbours():
+                defeated_by_token = [upper_token.defeated_by] + hex
+                if defeated_by_token in game_board.upper_occupied_hexes:
+                    new_hex = hex
+        else:
+            new_hex = viable_actions[0]
 
     upper_token.do_action(turn, new_hex)
-    game_board.upper_occupied_hexes.append(new_hex)
+    game_board.upper_occupied_hexes.append( [upper_token.symbol] + new_hex)
 
     return upper_token.convert_to_list(), defeated_tokens
 
@@ -102,6 +106,7 @@ def bfs(game_board, upper_token, lower_token):
 
         # Token is trapped so stay in place
         # Token should always be able to move
+        # Token will need to be defeated if it can't move / defeat another token
         if len(viable_actions) == 0 and next_action:
             return 0, [(upper_token.r, upper_token.q)]
         else:
@@ -125,22 +130,6 @@ def bfs(game_board, upper_token, lower_token):
     path.reverse()
 
     return distance, path
-
-
-def separate_tokens(tokens):
-    r_tokens = []
-    p_tokens = []
-    s_tokens= []
-
-    for token in tokens:
-        if token[0] == "r":
-            r_tokens.append(token)
-        elif token[0] == "p":
-            p_tokens.append(token)
-        elif token[0] == "s":
-            s_tokens.append(token)  
-    
-    return r_tokens, p_tokens, s_tokens
 
 '''
 Heursitic algorithm to find hex distance between two tokens
