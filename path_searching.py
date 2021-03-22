@@ -39,7 +39,8 @@ def do_tokens_turn(turn, game_board, upper_tokens, lower_tokens):
         
         new_upper_token, defeated_tokens = do_token_turn(turn, upper_token, game_board.upper_defeats[upper_token.symbol], game_board)
 
-        new_upper_tokens.append(new_upper_token)
+        if new_upper_token != None:
+            new_upper_tokens.append(new_upper_token)
 
         for defeated_token in defeated_tokens:
             lower_tokens.remove(defeated_token)
@@ -81,6 +82,7 @@ def do_token_turn(turn, upper_token, lower_tokens, game_board):
                 defeated_by_token = [upper_token.defeated_by] + hex
                 if defeated_by_token in game_board.upper_occupied_hexes:
                     new_hex = hex
+                    upper_token.set_defeat(True)
         else:
             new_hex = viable_actions[0]
 

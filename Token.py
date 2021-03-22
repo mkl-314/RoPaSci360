@@ -13,6 +13,7 @@ class Token(object):
         self.r = token[1]
         self.q = token[2]
         self.upper_player = upper_player
+        self.defeated = False
 
     def __eq__ (self, other):
         if isinstance(other, Token):
@@ -101,5 +102,11 @@ class Token(object):
         self.r = new_upper_token[0]
         self.q = new_upper_token[1]
 
+    def set_defeat(self, defeated):
+        self.defeated = defeated
+
     def convert_to_list(self):
-        return [ self.symbol, self.r, self. q]
+        if self.defeated:
+            return None
+        else:
+            return [ self.symbol, self.r, self. q]
