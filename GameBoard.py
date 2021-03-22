@@ -1,4 +1,4 @@
-from search.util import print_board
+from util import print_board
 
 class GameBoard(object):
     BLOCK = "#"

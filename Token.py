@@ -1,8 +1,8 @@
-from search.util import print_slide, print_swing
+from util import print_slide, print_swing
 import math
 
 class Token(object):
-    BLOCK = "#"
+    BLOCK = "#"  
     possible_neighbours = [ [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0] ]
     token_defeats = ["r", "s", "p"]
     
