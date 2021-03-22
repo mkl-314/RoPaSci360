@@ -1,7 +1,7 @@
 import sys
-from search.util import print_board, print_slide, print_swing
-from search.Token import Token
-from search.GameBoard import GameBoard
+from util import print_board, print_slide, print_swing
+from Token import Token
+from GameBoard import GameBoard
 
 '''
 bfs function derived from
@@ -101,7 +101,9 @@ def bfs(game_board, upper_token, lower_token):
 
         # Token is trapped so stay in place
         # Token should always be able to move
+        # Token will need to a place where it will be defeated
         if len(viable_actions) == 0 and next_action:
+
             return 0, [(upper_token.r, upper_token.q)]
         else:
             for next in viable_actions:
