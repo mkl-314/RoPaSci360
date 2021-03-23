@@ -21,7 +21,7 @@ class GameBoard(object):
                 hex = ( pos[1], pos[2])
                 if not hex in board_dict:
                     board_dict[hex] = ""
-
+                    
                 if token == "upper":
                     board_dict[hex] += pos[0].upper()
                 elif token == "lower":
