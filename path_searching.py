@@ -72,6 +72,9 @@ def do_token_turn(turn, upper_token, lower_tokens, game_board):
             while num_tokens > 0:
                 defeated_tokens.append(min_lower_token)
                 num_tokens -= 1
+        
+        # Check if upper token will be defeated
+
     else:
         # TODO Find other hexes to swing move
         # Get viable moves and move there
@@ -80,9 +83,17 @@ def do_token_turn(turn, upper_token, lower_tokens, game_board):
         if len(viable_actions) == 0:
             for hex in upper_token.neighbours():
                 defeated_by_token = [upper_token.defeated_by] + hex
-                if defeated_by_token in game_board.upper_occupied_hexes:
+                hex_tokens = ""
+
+                if tuple(hex) in game_board.board_dict:
+                    hex_tokens = game_board.board_dict[tuple(hex)]
+
+                if defeated_by_token in game_board.upper_occupied_hexes or \
+                   upper_token.defeated_by in hex_tokens:
+
                     new_hex = hex
                     upper_token.set_defeat(True)
+
         else:
             new_hex = viable_actions[0]
 
