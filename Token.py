@@ -1,4 +1,4 @@
-from search.util import print_slide, print_swing
+from util import print_slide, print_swing
 import math
 
 class Token(object):
@@ -51,8 +51,8 @@ class Token(object):
             ( 
                 defeated_by_token in game_board.upper_occupied_hexes or \
                 (defeats_token in game_board.upper_occupied_hexes and 
-                (len(game_board.upper_defeats[token.symbol]) > 0 
-                or game_board.upper_tokens[token.defeats] == 1))
+                (len(game_board.upper_defeats[token.defeats]) > 0 
+                and game_board.upper_tokens[token.defeats] == 1))
                 ):
                 # upper token cannot be defeated
                 continue
@@ -61,7 +61,7 @@ class Token(object):
                 if tuple(hex) in game_board.board_dict:
                     hex_tokens = game_board.board_dict[tuple(hex)]
                     if self.BLOCK not in hex_tokens:
-                        if token.defeated_by not in hex_tokens:
+                        if not next_action or token.defeated_by not in hex_tokens:
                             viable_hexes.append(hex)
                     
                         if next_action and self == token:

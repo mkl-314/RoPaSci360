@@ -1,7 +1,7 @@
 import sys
-from search.util import print_board, print_slide, print_swing
-from search.Token import Token
-from search.GameBoard import GameBoard
+from util import print_board, print_slide, print_swing
+from Token import Token
+from GameBoard import GameBoard
 
 '''
 bfs function derived from
@@ -13,37 +13,38 @@ def do_turns(data):
 
     game_board.print()
 
-    lower_tokens = data["lower"]
-    upper_tokens = data["upper"]
-    block_tokens = data["block"]
+    # lower_tokens = game_board.data["lower"]
+    # upper_tokens = game_board.data["upper"]
+    # block_tokens = game_board.data["block"]
     
     turn = 1
     
-    while len(lower_tokens) > 0 and turn <= 360:
+    while len(game_board.data["lower"]) > 0 and turn <= 360:
 
         # TODO tokens need to talk to each other
-        upper_tokens = do_tokens_turn(turn, game_board, upper_tokens, lower_tokens)
+        upper_tokens = do_tokens_turn(turn, game_board)
 
-        new_data = {"upper": upper_tokens, "lower": lower_tokens, "block": block_tokens}
+        new_data = {"upper": upper_tokens, "lower": game_board.data["lower"], "block": game_board.data["block"]}
 
         game_board = GameBoard(new_data)
         game_board.print()
 
-        turn += 1
+        turn += 1 
 
-def do_tokens_turn(turn, game_board, upper_tokens, lower_tokens):
+def do_tokens_turn(turn, game_board):
     new_upper_tokens = []
+    upper_tokens = game_board.data["upper"]
 
     for upper in upper_tokens:
         upper_token = Token(upper, True)
         
         new_upper_token, defeated_tokens = do_token_turn(turn, upper_token, game_board.upper_defeats[upper_token.symbol], game_board)
 
-        if new_upper_token != None:
-            new_upper_tokens.append(new_upper_token)
+        #if new_upper_token != None:
+        new_upper_tokens.append(new_upper_token)
 
-        for defeated_token in defeated_tokens:
-            lower_tokens.remove(defeated_token)
+        # for defeated_token in defeated_tokens:
+        #     lower_tokens.remove(defeated_token)
 
     return new_upper_tokens
 
@@ -68,10 +69,10 @@ def do_token_turn(turn, upper_token, lower_tokens, game_board):
                 num_tokens += 1
 
         # Remove all deleted tokens
-        if new_hex == min_lower_token[1:]:
-            while num_tokens > 0:
-                defeated_tokens.append(min_lower_token)
-                num_tokens -= 1
+        # if new_hex == min_lower_token[1:]:
+        #     while num_tokens > 0:
+        #         defeated_tokens.append(min_lower_token)
+        #         num_tokens -= 1
         
         # Check if upper token will be defeated
 
@@ -92,7 +93,7 @@ def do_token_turn(turn, upper_token, lower_tokens, game_board):
                    upper_token.defeated_by in hex_tokens:
 
                     new_hex = hex
-                    upper_token.set_defeat(True)
+                    #upper_token.set_defeat(True)
 
         else:
             new_hex = viable_actions[0]

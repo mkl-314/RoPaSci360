@@ -1,20 +1,23 @@
-from search.util import print_board
+from util import print_board
+import re
 
 class GameBoard(object):
     BLOCK = "#"
+    token_defeats = ["r", "s", "p"]
 
     def __init__(self, data):
-        self.data = data
-        self.board_dict = self.format_file(data)
+        self.board_dict = self.updates_board(data)
+        self.data = self.convert_to_data(self.board_dict)
         self.upper_occupied_hexes = []
 
         self.upper_tokens = {}
-        self.upper_tokens["r"], self.upper_tokens["p"], self.upper_tokens["s"] = self.separate_tokens(data["upper"]) 
-        self.r_lower_tokens, self.p_lower_tokens, self.s_lower_tokens = self.separate_tokens(data["lower"]) 
+        self.upper_tokens["r"], self.upper_tokens["p"], self.upper_tokens["s"] = self.separate_tokens(self.data["upper"]) 
+        self.r_lower_tokens, self.p_lower_tokens, self.s_lower_tokens = self.separate_tokens(self.data["lower"]) 
     
         self.upper_defeats = {"r": self.s_lower_tokens, "s": self.p_lower_tokens, "p": self.r_lower_tokens}
     
-    def format_file(self, data):
+    # formats gameboard data for printing and removes any tokens that are meant to be deleted
+    def updates_board(self, data):
         board_dict = {}
         for (token, positions) in data.items():
             for pos in positions:
@@ -28,8 +31,32 @@ class GameBoard(object):
                     board_dict[hex] += pos[0].lower()
                 else:
                     board_dict[hex] = self.BLOCK
-                
+        
+        board_dict = self.delete_defeated_tokens(board_dict)
         return board_dict
+
+    def delete_defeated_tokens(self, board_dict):
+        for (hex, symbols) in board_dict.items():
+            if "r" in symbols.lower() and "p" in symbols.lower() and "s" in symbols.lower():
+                board_dict[hex] = ""
+            else:
+                for i in range(3):
+                    if self.token_defeats[i] in symbols.lower() and self.token_defeats[i-1] in symbols.lower():
+                        board_dict[hex] = re.sub(self.token_defeats[i], "", board_dict[hex], flags=re.IGNORECASE)
+        return board_dict
+
+    def convert_to_data(self, board_dict):
+        data = {"upper": [], "lower": [], "block": []}
+
+        for (hex, symbols) in board_dict.items():
+            for symbol in symbols:
+                if symbol == "#":
+                    data["block"].append(["", hex[0], hex[1]])
+                elif symbol.isupper():
+                    data["upper"].append([symbol.lower(), hex[0], hex[1]])
+                elif symbol.islower():
+                    data["lower"].append([symbol, hex[0], hex[1]])
+        return data
 
     def separate_tokens(self, tokens):
         r_tokens = []
