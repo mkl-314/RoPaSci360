@@ -44,55 +44,39 @@ def do_token_turn(turn, upper_token, game_board):
 
     if len(lower_tokens) > 0:
         new_hex = closest_lower_token_path(game_board, upper_token, lower_tokens)
-        # min_distance = -1
-        # for lower_token in lower_tokens:
-        #     l_token = Token(lower_token, False)
-        #     # Tim's heuristic test
-        #     # print("heuristic distance to", (lower_token), heuristic(upper_token, l_token))
-        #     distance, path = bfs(game_board, upper_token, l_token)
-
-        #     if distance < min_distance or min_distance == -1:
-        #         num_tokens = 1
-        #         min_distance = distance
-        #         min_lower_token = lower_token
-        #         new_hex = list(path[0])
-        #     # note two of the same tokens on one hex
-        #     elif min_lower_token == lower_token:
-        #         num_tokens += 1
-
     else:
-        # Get viable moves and move there
-        viable_actions = upper_token.viable_actions(game_board, 1)
-        # commit suicide if no viable moves
+        viable_actions = upper_token.viable_actions(game_board, True)
+
         if len(viable_actions) == 0:
-            for hex in upper_token.neighbours():
-                defeated_by_token = [upper_token.defeated_by] + hex
-                hex_tokens = ""
-
-                if tuple(hex) in game_board.board_dict:
-                    hex_tokens = game_board.board_dict[tuple(hex)]
-
-                if defeated_by_token in game_board.upper_occupied_hexes or \
-                   upper_token.defeated_by in hex_tokens:
-                    new_hex = hex
-
+        # Token must be defeated if no viable moves
+            new_hex = token_defeat(upper_token, game_board)
         else:
-            # Move to most center hex
-            #new_hex = closest_lower_token_path(game_board, upper_token, game_board.data["lower"], avoid_token=True)
+            new_hex = closest_lower_token_path(game_board, upper_token, game_board.data["lower"], avoid_token=True)
 
-            new_hex = viable_actions[0]
 
     upper_token.do_action(turn, new_hex)
     game_board.upper_occupied_hexes.append( [upper_token.symbol] + new_hex)
 
     return upper_token.convert_to_list()
 
+# Finds the path to the closest lower_token and returns the next move
 def closest_lower_token_path(game_board, upper_token, lower_tokens, avoid_token=False):
     min_distance = -1
     for lower_token in lower_tokens:
         l_token = Token(lower_token, False)
         # Tim's heuristic test
         # print("heuristic distance to", (lower_token), heuristic(upper_token, l_token))
+        if avoid_token:
+            viable_actions = upper_token.viable_actions(game_board, True)
+            if [l_token.r, l_token.q] in viable_actions: 
+                if len(viable_actions) > 1:
+                    viable_actions.remove([l_token.r, l_token.q])
+                    for action in viable_actions:
+                        if heuristic(Token([upper_token.symbol] + action, True), l_token) == 1:
+                            return action
+                
+                return viable_actions[0]
+
         distance, path = bfs(game_board, upper_token, l_token)
 
         if distance < min_distance or min_distance == -1:
@@ -105,6 +89,20 @@ def closest_lower_token_path(game_board, upper_token, lower_tokens, avoid_token=
             num_tokens += 1
 
     return new_hex
+
+# Finds hex which token will be defeated on
+def token_defeat(upper_token, game_board):
+    for hex in upper_token.neighbours():
+        defeated_by_token = [upper_token.defeated_by] + hex
+        hex_tokens = ""
+
+        if tuple(hex) in game_board.board_dict:
+            hex_tokens = game_board.board_dict[tuple(hex)]
+
+        if defeated_by_token in game_board.upper_occupied_hexes or \
+            upper_token.defeated_by in hex_tokens:
+            return hex
+
 
 def bfs(game_board, upper_token, lower_token):
 
@@ -132,7 +130,7 @@ def bfs(game_board, upper_token, lower_token):
         # Token should always be able to move
         # Token will need to be defeated if it can't move / defeat another token
         if len(viable_actions) == 0 and next_action:
-            return 0, [(upper_token.r, upper_token.q)]
+            return 0, [token_defeat(upper_token, game_board)]
         else:
             for next in viable_actions:
                 if tuple(next) not in flood:
