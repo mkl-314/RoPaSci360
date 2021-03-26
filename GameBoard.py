@@ -11,10 +11,9 @@ class GameBoard(object):
         self.upper_occupied_hexes = []
 
         self.upper_tokens = {}
+        self.lower_tokens = {}
         self.upper_tokens["r"], self.upper_tokens["p"], self.upper_tokens["s"] = self.separate_tokens(self.data["upper"]) 
-        self.r_lower_tokens, self.p_lower_tokens, self.s_lower_tokens = self.separate_tokens(self.data["lower"]) 
-    
-        self.upper_defeats = {"r": self.s_lower_tokens, "s": self.p_lower_tokens, "p": self.r_lower_tokens}
+        self.lower_tokens["r"], self.lower_tokens["p"], self.lower_tokens["s"] = self.separate_tokens(self.data["lower"]) 
     
     # formats gameboard data for printing and removes any tokens that are meant to be deleted
     def updates_board(self, data):

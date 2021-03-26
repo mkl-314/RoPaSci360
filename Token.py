@@ -51,8 +51,8 @@ class Token(object):
             ( 
                 defeated_by_token in game_board.upper_occupied_hexes or \
                 (defeats_token in game_board.upper_occupied_hexes and 
-                (len(game_board.upper_defeats[token.defeats]) > 0 
-                and game_board.upper_tokens[token.defeats] == 1))
+                (len(game_board.lower_tokens[token.defeated_by] ) > 0 
+                and len(game_board.upper_tokens[token.defeats]) == 1))
                 ):
                 # upper token cannot be defeated
                 continue
