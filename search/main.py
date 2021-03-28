@@ -20,9 +20,6 @@ def main():
         with open(sys.argv[1]) as file:
             data = json.load(file)
     except IndexError:
-        test_file = input("Input file:")
-        data = json.load(open(test_file))
-
         #print("usage: python3 -m search path/to/input.json", file=sys.stderr)
         print("Please input the correct file name so we can get marks")
         #sys.exit(1)

@@ -108,7 +108,7 @@ def bfs(game_board, upper_token, lower_token):
 
     queue = []
     queue.append(upper_token)
-    flood = {}    
+    flood = {(upper_token.r, upper_token.q): (upper_token.r, upper_token.q)}    
     next_action = True
     avoid_curr = None
 
