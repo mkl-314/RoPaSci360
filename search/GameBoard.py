@@ -5,7 +5,8 @@ class GameBoard(object):
     BLOCK = "#"
     token_defeats = ["r", "s", "p"]
 
-    def __init__(self, data):
+    def __init__(self, data, turn):
+        self.turn = turn
         self.board_dict = self.updates_board(data)
         self.data = self.convert_to_data(self.board_dict)
         self.upper_occupied_hexes = []
