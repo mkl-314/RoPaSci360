@@ -2,34 +2,102 @@ import sys
 from util import print_board, print_slide, print_swing
 from Token import Token
 from GameBoard import GameBoard
+from AllTokens import AllTokens
+from throw_move import *
 
 '''
 bfs function derived from
 https://www.redblobgames.com/pathfinding/a-star/introduction.html
 '''
 
-def do_turns(data):
+def get_input():
+
+    data = {"lower": [], "upper": [], "block": []}
+
+    turn = 1
+
+    # assume ai is Upper
+    while turn <= 360:
+
+        # Formats: ("Throw", "p", (0, 0))
+        # ("Slide", (0, 0), (0, 1))
+
+        # Simple Formats for testing: ("Throw", "p", 0, 0)
+        # ("Slide", 0, 0, 0, 1)
+        next_move = input("Input turn:")
+
+        data = do_upper_move(data, turn)
+        lower_move(data, next_move)
+
+        print("Turn: " + str(turn))
+        game_board = GameBoard(data)
+        game_board.print()
+        turn += 1
+
+def lower_move(data, next_move):
+
+    try:
+        # Formats: ("Throw", "p", (0, 0))
+        # ("Slide", (0, 0), (0, 1))
+
+        # Simple Formats for testing: ("Throw", "p", 0, 0)
+        # ("Slide", 0, 0, 0, 1)
+        #next_move = input("Input turn:")
+        lst_next_move = next_move.strip("][)(").split(", ")
+
+
+        if lst_next_move[0] == "THROW":
+            token = [lst_next_move[1], int(lst_next_move[2]), int(lst_next_move[3])]
+            data["lower"].append(token)
+            #data["lower"] += [lst_next_move[1], int(lst_next_move[2].strip("(")), int(lst_next_move[3].strip(")"))]
+        elif lst_next_move[0] == "SLIDE" or lst_next_move[0] == "SWING":
+            found_token = False
+            for old_token in data["lower"]:
+                token_pos = [int(lst_next_move[1]), int(lst_next_move[2])]
+                if token_pos == old_token[1:3]:
+                    old_token[1:3] = [int(lst_next_move[3]), int(lst_next_move[4])]
+                    found_token = True
+                    break
+                    # check that th token gets updated
+            if not found_token:
+                raise ValueError("Print correct format")
+
+        return data
+    except:
+        print("Print correct format as seen in function lower_move")
+        next_move = input("Input turn:")
+        lower_move(data, next_move)
+
+def do_upper_move(data, turn):
     game_board = GameBoard(data)
 
-    game_board.print()
+    #game_board.print()
 
     lower_tokens = data["lower"]
     upper_tokens = data["upper"]
     block_tokens = data["block"]
     
-    turn = 1
+    all_tokens = AllTokens()
+
+    if len(lower_tokens) > 0:
+        # Find potential paths to token 
+        # Throw move
+        hexes = throwable_hexes()
     
-    while len(lower_tokens) > 0 and turn <= 360:
+    # Do throw move  
+    symbol = all_tokens.upper_tokens_in_hand.pop()
+    offset = 5
+    upper_tokens.append([symbol, offset - turn, -2])
 
-        # TODO tokens need to talk to each other
-        upper_tokens = do_tokens_turn(turn, game_board, upper_tokens, lower_tokens)
+    # TODO tokens need to talk to each other
+    #upper_tokens = do_tokens_turn(turn, game_board, upper_tokens, lower_tokens)
 
-        new_data = {"upper": upper_tokens, "lower": lower_tokens, "block": block_tokens}
+    data = {"upper": upper_tokens, "lower": lower_tokens, "block": block_tokens}
 
-        game_board = GameBoard(new_data)
-        game_board.print()
+    return data
+    # game_board = GameBoard(data)
+    # game_board.print()
 
-        turn += 1
 
 def do_tokens_turn(turn, game_board, upper_tokens, lower_tokens):
     new_upper_tokens = []
@@ -101,9 +169,7 @@ def bfs(game_board, upper_token, lower_token):
 
         # Token is trapped so stay in place
         # Token should always be able to move
-        # Token will need to a place where it will be defeated
         if len(viable_actions) == 0 and next_action:
-
             return 0, [(upper_token.r, upper_token.q)]
         else:
             for next in viable_actions:
