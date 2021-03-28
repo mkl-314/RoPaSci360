@@ -41,6 +41,7 @@ class Token(object):
     def get_viable_hexes(self, token, game_board, next_action):
         viable_hexes = []
         swing_hexes = []
+        only_hex = []
 
         for hex in token.neighbours():
 
@@ -56,6 +57,10 @@ class Token(object):
                 # upper token cannot be defeated
                 continue
             else:
+                if [token.symbol] + hex in game_board.upper_occupied_hexes:
+                    only_hex = hex
+                    continue
+
                 # check if block or oppoenent is in hex
                 if tuple(hex) in game_board.board_dict:
                     hex_tokens = game_board.board_dict[tuple(hex)]
@@ -70,6 +75,9 @@ class Token(object):
                 else:
                     viable_hexes.append(hex)
 
+        if len(viable_hexes) == 0 and only_hex != []:
+            viable_hexes.append(only_hex)
+            
         return viable_hexes, swing_hexes
 
     def do_action(self, turn, new_hex):
