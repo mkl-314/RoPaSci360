@@ -30,7 +30,7 @@ def get_input():
         lower_move(data, next_move)
 
         print("Turn: " + str(turn))
-        game_board = GameBoard(data)
+        game_board = GameBoard(data, turn)
         game_board.print()
         turn += 1
 
