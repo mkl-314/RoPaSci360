@@ -1,18 +1,23 @@
+<<<<<<< HEAD
 from util import print_board
+=======
+from search.util import print_board
+>>>>>>> 9aa5fd7d2e37aef040fdb3c91540f037a71077e9
 import re
-import copy 
 
 class GameBoard(object):
     BLOCK = "#"
     token_defeats = ["r", "s", "p"]
 
+<<<<<<< HEAD
     def __init__(self, data, turn):
         self.turn = turn
+=======
+    def __init__(self, data):
+>>>>>>> 9aa5fd7d2e37aef040fdb3c91540f037a71077e9
         self.board_dict = self.updates_board(data)
         self.data = self.convert_to_data(self.board_dict)
         self.upper_occupied_hexes = []
-        # AllTokens variables are static at the moment so it won't return accurate data
-        self.all_tokens =  AllTokens()
 
         self.upper_tokens = {}
         self.lower_tokens = {}
@@ -76,34 +81,10 @@ class GameBoard(object):
         
         return r_tokens, p_tokens, s_tokens
 
-
-    def apply_action(self, token, action):
-
-        new_data = copy.deepcopy(self.data)
-
-        player = "upper" if token.upper_player else "lower"
-        
-        for old_token in new_data[player]:
-            if token.convert_to_list() == old_token and action != None:
-                old_token[1:3] = action
-                
-                return GameBoard(new_data, self.turn + 1)
-        
-        # Throw move
-        new_data[player].append(token.convert_to_list())
-        return GameBoard(new_data, self.turn + 1)
-
-
-
-        # Evaluate the value that the state has
-        # count my tokens to their tokens + positioning + location
-        # Heuristics? - using would mean halving distance as swing moves may occur
-    def eval(self):
-        value = len(self.data["upper"]) - len(self.data["lower"])
-        
-        
-        return value
-
-
     def print(self):
+<<<<<<< HEAD
         print_board(self.board_dict)
+=======
+        print_board(self.board_dict)
+
+>>>>>>> 9aa5fd7d2e37aef040fdb3c91540f037a71077e9

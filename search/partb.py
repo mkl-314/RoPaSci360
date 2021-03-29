@@ -3,7 +3,8 @@ from util import print_board, print_slide, print_swing
 from Token import Token
 from GameBoard import GameBoard
 from AllTokens import AllTokens
-from throw_move import *
+from moves.throw_move import *
+from minimax import *
 
 '''
 bfs function derived from
@@ -58,7 +59,7 @@ def lower_move(data, next_move):
                     old_token[1:3] = [int(lst_next_move[3]), int(lst_next_move[4])]
                     found_token = True
                     break
-                    # check that th token gets updated
+                    # check that the token gets updated
             if not found_token:
                 raise ValueError("Print correct format")
 
@@ -69,34 +70,28 @@ def lower_move(data, next_move):
         lower_move(data, next_move)
 
 def do_upper_move(data, turn):
-    game_board = GameBoard(data)
+    game_board = GameBoard(data, turn)
 
-    #game_board.print()
-
-    lower_tokens = data["lower"]
-    upper_tokens = data["upper"]
-    block_tokens = data["block"]
-    
     all_tokens = AllTokens()
 
-    if len(lower_tokens) > 0:
-        # Find potential paths to token 
-        # Throw move
-        hexes = throwable_hexes()
+    # Find potential paths to token 
+    # Throw move
+    #hexes = throwable_hexes()
     
-    # Do throw move  
-    symbol = all_tokens.upper_tokens_in_hand.pop()
-    offset = 5
-    upper_tokens.append([symbol, offset - turn, -2])
+    hexes = throwable_hexes()
 
-    # TODO tokens need to talk to each other
-    #upper_tokens = do_tokens_turn(turn, game_board, upper_tokens, lower_tokens)
+    if turn <=2:
+        # Do throw move  
+        symbol = all_tokens.upper_tokens_in_hand.pop()
+        
+        #upper_tokens.append([symbol] + hexes[0])
+        game_board = game_board.apply_action(Token([symbol] + hexes[0], True), None)
+    else:
+        move = minimax_manager(game_board)
+        game_board = game_board.apply_action(move[0], move[1])
+        move[0].do_action(turn, move[1])
 
-    data = {"upper": upper_tokens, "lower": lower_tokens, "block": block_tokens}
-
-    return data
-    # game_board = GameBoard(data)
-    # game_board.print()
+    return game_board.data
 
 
 def do_tokens_turn(turn, game_board, upper_tokens, lower_tokens):

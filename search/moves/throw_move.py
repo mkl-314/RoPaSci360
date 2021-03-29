@@ -15,4 +15,4 @@ def throwable_hexes():
     lower_range = len(all_tokens.upper_tokens_in_hand) - 5
     throw_ran = range(lower_range, 4+1)
     ran = range(-4, 4+1)
-    return [(r,q) for r in throw_ran for q in ran if r+q in ran]
+    return [[r,q] for r in throw_ran for q in ran if r+q in ran]

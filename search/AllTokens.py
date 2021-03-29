@@ -4,12 +4,13 @@ import math
 class AllTokens(object):
     # static variables
     BLOCK = "#"  
-    upper_tokens_in_hand = ["r", "s", "p"] * 3
-    lower_tokens_in_hand = ["r", "s", "p"] * 3
+    # upper_tokens_in_hand = ["r", "s", "p"] * 3
+    # lower_tokens_in_hand = ["r", "s", "p"] * 3
     token_defeats = ["r", "s", "p"] 
     
     def __init__ (self):
-        self.hello = ["r", "s", "p"] * 3
+        self.upper_tokens_in_hand = ["r", "s", "p"] * 3
+        self.lower_tokens_in_hand = ["r", "s", "p"] * 3
 
 
 

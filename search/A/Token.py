@@ -20,7 +20,7 @@ class Token(object):
             return self.r == other.r and self.q == other.q \
             and self.symbol == other.symbol and self.upper_player == other.upper_player
 
-    # Refactor to return ALL viable moves, regardless of how bad they are
+
     def viable_actions(self, game_board, next_action):
 
         # slide move
@@ -109,5 +109,11 @@ class Token(object):
         self.r = new_upper_token[0]
         self.q = new_upper_token[1]
 
+    def set_defeat(self, defeated):
+        self.defeated = defeated
+
     def convert_to_list(self):
-        return [ self.symbol, self.r, self. q]
+        if self.defeated:
+            return None
+        else:
+            return [ self.symbol, self.r, self. q]
