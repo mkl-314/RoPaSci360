@@ -1,3 +1,3 @@
-from main import main
+from search.main import main
 
 main()

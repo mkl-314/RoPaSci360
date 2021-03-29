@@ -1,12 +1,20 @@
+<<<<<<< HEAD
 from util import print_board
+=======
+from search.util import print_board
+>>>>>>> 9aa5fd7d2e37aef040fdb3c91540f037a71077e9
 import re
 
 class GameBoard(object):
     BLOCK = "#"
     token_defeats = ["r", "s", "p"]
 
+<<<<<<< HEAD
     def __init__(self, data, turn):
         self.turn = turn
+=======
+    def __init__(self, data):
+>>>>>>> 9aa5fd7d2e37aef040fdb3c91540f037a71077e9
         self.board_dict = self.updates_board(data)
         self.data = self.convert_to_data(self.board_dict)
         self.upper_occupied_hexes = []
@@ -74,4 +82,9 @@ class GameBoard(object):
         return r_tokens, p_tokens, s_tokens
 
     def print(self):
+<<<<<<< HEAD
         print_board(self.board_dict)
+=======
+        print_board(self.board_dict)
+
+>>>>>>> 9aa5fd7d2e37aef040fdb3c91540f037a71077e9

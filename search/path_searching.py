@@ -1,7 +1,13 @@
 import sys
+<<<<<<< HEAD
 from util import print_board, print_slide, print_swing
 from Token import Token
 from GameBoard import GameBoard
+=======
+from search.util import print_board, print_slide, print_swing
+from search.Token import Token
+from search.GameBoard import GameBoard
+>>>>>>> 9aa5fd7d2e37aef040fdb3c91540f037a71077e9
 
 '''
 bfs function derived from
@@ -168,4 +174,8 @@ def heuristic(token1, token2):
     # Difference of differences
     d = x - y
     # Highest absolute is distance
+<<<<<<< HEAD
     return max(abs(x) ,abs(y) ,abs(d))
+=======
+    return max(abs(x) ,abs(y) ,abs(d))
+>>>>>>> 9aa5fd7d2e37aef040fdb3c91540f037a71077e9
