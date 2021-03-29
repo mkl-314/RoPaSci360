@@ -1,35 +1,98 @@
 import sys
-from search.util import print_board, print_slide, print_swing
-from search.Token import Token
-from search.GameBoard import GameBoard
+from util import print_board, print_slide, print_swing
+from Token import Token
+from GameBoard import GameBoard
+from AllTokens import AllTokens
+from moves.throw_move import *
+from minimax import *
 
 '''
 bfs function derived from
 https://www.redblobgames.com/pathfinding/a-star/introduction.html
 '''
 
-def do_turns(data):
-    game_board = GameBoard(data)
+def get_input():
 
-    game_board.print()
+    data = {"lower": [], "upper": [], "block": []}
 
-    lower_tokens = data["lower"]
-    upper_tokens = data["upper"]
-    block_tokens = data["block"]
-    
     turn = 1
-    
-    while len(lower_tokens) > 0 and turn <= 360:
 
-        # TODO tokens need to talk to each other
-        upper_tokens = do_tokens_turn(turn, game_board, upper_tokens, lower_tokens)
+    # assume ai is Upper
+    while turn <= 360:
 
-        new_data = {"upper": upper_tokens, "lower": lower_tokens, "block": block_tokens}
+        # Formats: ("Throw", "p", (0, 0))
+        # ("Slide", (0, 0), (0, 1))
 
-        game_board = GameBoard(new_data)
+        # Simple Formats for testing: ("Throw", "p", 0, 0)
+        # ("Slide", 0, 0, 0, 1)
+        next_move = input("Input turn:")
+
+        data = do_upper_move(data, turn)
+        lower_move(data, next_move)
+
+        print("Turn: " + str(turn))
+        game_board = GameBoard(data, turn)
         game_board.print()
-
         turn += 1
+
+def lower_move(data, next_move):
+
+    try:
+        # Formats: ("Throw", "p", (0, 0))
+        # ("Slide", (0, 0), (0, 1))
+
+        # Simple Formats for testing: ("Throw", "p", 0, 0)
+        # ("Slide", 0, 0, 0, 1)
+        #next_move = input("Input turn:")
+        lst_next_move = next_move.strip("][)(").split(", ")
+
+
+        if lst_next_move[0] == "THROW":
+            token = [lst_next_move[1], int(lst_next_move[2]), int(lst_next_move[3])]
+            data["lower"].append(token)
+            #data["lower"] += [lst_next_move[1], int(lst_next_move[2].strip("(")), int(lst_next_move[3].strip(")"))]
+        elif lst_next_move[0] == "SLIDE" or lst_next_move[0] == "SWING":
+            found_token = False
+            for old_token in data["lower"]:
+                token_pos = [int(lst_next_move[1]), int(lst_next_move[2])]
+                if token_pos == old_token[1:3]:
+                    old_token[1:3] = [int(lst_next_move[3]), int(lst_next_move[4])]
+                    found_token = True
+                    break
+                    # check that the token gets updated
+            if not found_token:
+                raise ValueError("Print correct format")
+
+        return data
+    except:
+        print("Print correct format as seen in function lower_move")
+        next_move = input("Input turn:")
+        lower_move(data, next_move)
+
+def do_upper_move(data, turn):
+    game_board = GameBoard(data, turn)
+
+    all_tokens = AllTokens()
+
+    # Find potential paths to token 
+    # Throw move
+    #hexes = throwable_hexes()
+    
+    hexes = throwable_hexes()
+
+    if turn <=2:
+        # Do throw move  
+        symbol = all_tokens.upper_tokens_in_hand.pop()
+        
+        #upper_tokens.append([symbol] + hexes[0])
+        game_board = game_board.apply_action(Token([symbol] + hexes[0], True), None)
+    else:
+        move = minimax_manager(game_board)
+        game_board = game_board.apply_action(move[0], move[1])
+        move[0].do_action(turn, move[1])
+
+    return game_board.data
+
 
 def do_tokens_turn(turn, game_board, upper_tokens, lower_tokens):
     new_upper_tokens = []
