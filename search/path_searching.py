@@ -14,7 +14,7 @@ def do_turns(data):
     game_board.print()
     turn = 1
     
-    while len(game_board.data["lower"]) > 0 and turn <= 5:
+    while len(game_board.data["lower"]) > 0 and turn <= 360:
 
         # TODO tokens need to talk to each other
         upper_tokens = do_tokens_turn(turn, game_board)
@@ -30,8 +30,8 @@ def do_tokens_turn(turn, game_board):
     new_upper_tokens = []
     upper_tokens = game_board.data["upper"]
 
-    for perm_upper_tokens in list(permutations(upper_tokens)):
-        for upper in perm_upper_tokens:
+    for perm_upper_token in list(permutations(upper_tokens)):
+        for upper in perm_upper_token:
             upper_token = Token(upper, True)
             
             new_upper_token = do_token_turn(turn, upper_token, game_board)
@@ -45,6 +45,7 @@ def do_tokens_turn(turn, game_board):
 
         if new_upper_tokens != []:
             break
+        print("#Perm")
     
     upper_tokens_list = []
     for upper_token in new_upper_tokens:
@@ -70,7 +71,6 @@ def do_token_turn(turn, upper_token, game_board):
     if new_hex == [-5, -5]:
         return None
 
-    #upper_token.do_action(turn, new_hex)
     upper_token.set_new_hex(new_hex)
     game_board.upper_occupied_hexes.append( [upper_token.symbol] + new_hex)
 
