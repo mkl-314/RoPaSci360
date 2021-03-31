@@ -66,7 +66,8 @@ class Token(object):
                     hex_tokens = game_board.board_dict[tuple(hex)]
                     if self.BLOCK not in hex_tokens:
                         if not next_action or token.defeated_by not in hex_tokens:
-                            viable_hexes.append(hex)
+                            if [self.r, self.q] != hex:
+                                viable_hexes.append(hex)
                     
                         if next_action and self == token:
                             if not hex_tokens.islower():
@@ -80,14 +81,17 @@ class Token(object):
             
         return viable_hexes, swing_hexes
 
-    def do_action(self, turn, new_hex):
-        
-        if self.is_adjacent_hex(new_hex):
-            print_slide(turn, self.r, self.q, new_hex[0], new_hex[1])
-        else:
-            print_swing(turn, self.r, self.q, new_hex[0], new_hex[1])
+    def set_new_hex(self, new_hex):
+        self.new_hex = new_hex
 
-        self.update(new_hex)
+    def do_action(self, turn):
+
+        if self.is_adjacent_hex(self.new_hex):
+            print_slide(turn, self.r, self.q, self.new_hex[0], self.new_hex[1])
+        else:
+            print_swing(turn, self.r, self.q, self.new_hex[0], self.new_hex[1])
+
+        self.update(self.new_hex)
         
 
     def is_adjacent_hex(self, new_hex):
@@ -109,11 +113,6 @@ class Token(object):
         self.r = new_upper_token[0]
         self.q = new_upper_token[1]
 
-    def set_defeat(self, defeated):
-        self.defeated = defeated
 
     def convert_to_list(self):
-        if self.defeated:
-            return None
-        else:
-            return [ self.symbol, self.r, self. q]
+        return [ self.symbol, self.r, self. q]
