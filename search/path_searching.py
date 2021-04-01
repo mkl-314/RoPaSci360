@@ -45,7 +45,6 @@ def do_tokens_turn(turn, game_board):
 
         if new_upper_tokens != []:
             break
-        print("#Perm")
     
     upper_tokens_list = []
     for upper_token in new_upper_tokens:
