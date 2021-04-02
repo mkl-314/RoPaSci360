@@ -25,26 +25,10 @@ class Player:
         """
         self.turn += 1
         
-        hexes = throwable_hexes(self.game_board)
+        move = minimax_manager(self.game_board)
 
-        if self.turn <=3:
-            # Do throw move  
-            symbol = self.game_board.tokens_in_hand[self.player][0]
-            
-            #upper_tokens.append([symbol] + hexes[0])
-            #game_board = game_board.apply_action(Token([symbol] + hexes[0], True), None)
+        return move[0].do_action(move[1])
 
-            return ("THROW", symbol, hexes[0])
-        else:
-            move = minimax_manager(self.game_board)
-            #game_board = self.game_board.apply_action(move[0], move[1])
-
-            #move[0].do_action(self.turn, move[1])
-
-            return move[0].do_action(move[1])
-            
-
-        return None
     
     def update(self, opponent_action, player_action):
         """
