@@ -10,10 +10,9 @@ class Token(object):
         self.symbol = token[0]
         self.defeated_by = self.token_defeats[self.token_defeats.index(self.symbol)-1]
         self.defeats = self.token_defeats[self.token_defeats.index(self.symbol)-2]
-        self.r = token[1]  # (r, q)
+        self.r = token[1] 
         self.q = token[2]
         self.upper_player = upper_player
-        self.defeated = False
 
     def __eq__ (self, other):
         if isinstance(other, Token):
@@ -41,47 +40,71 @@ class Token(object):
     def get_viable_hexes(self, token, game_board, next_action):
         viable_hexes = []
         swing_hexes = []
-        only_hex = []
 
         for hex in token.neighbours():
 
-            defeated_by_token = [token.defeated_by] + hex
-            defeats_token = [token.defeats] + hex
-            # check if another Upper token is moving to this hex and if it can be defeated by this token
-            if next_action and \
-            ( 
-                defeated_by_token in game_board.upper_occupied_hexes or \
-                (defeats_token in game_board.upper_occupied_hexes and 
-                len(game_board.lower_tokens[token.defeated_by] ) > 0)
-            ):
-                # upper token cannot be defeated
-                continue
+            # check if block or oppoenent is in hex
+            if tuple(hex) in game_board.board_dict:
+                hex_tokens = game_board.board_dict[tuple(hex)]
+                viable_hexes.append(hex)
+            
+                if next_action and self == token:
+                    if not hex_tokens.islower():
+                        swing_hexes.append(hex)
+            # empty hex
             else:
-                if [token.symbol] + hex in game_board.upper_occupied_hexes:
-                    only_hex = hex
-                    continue
-
-                # check if block or oppoenent is in hex
-                if tuple(hex) in game_board.board_dict:
-                    hex_tokens = game_board.board_dict[tuple(hex)]
-                    if self.BLOCK not in hex_tokens:
-                        if not next_action or token.defeated_by not in hex_tokens:
-                            viable_hexes.append(hex)
-                    
-                        if next_action and self == token:
-                            if not hex_tokens.islower():
-                                swing_hexes.append(hex)
-                # empty hex
-                else:
-                    viable_hexes.append(hex)
-
-        if len(viable_hexes) == 0 and only_hex != []:
-            viable_hexes.append(only_hex)
+                viable_hexes.append(hex)
             
         return viable_hexes, swing_hexes
 
+    # def get_viable_hexes(self, token, game_board, next_action):
+    #     viable_hexes = []
+    #     swing_hexes = []
+    #     only_hex = []
+
+    #     for hex in token.neighbours():
+
+    #         defeated_by_token = [token.defeated_by] + hex
+    #         defeats_token = [token.defeats] + hex
+    #         # check if another Upper token is moving to this hex and if it can be defeated by this token
+    #         if next_action and \
+    #         ( 
+    #             defeated_by_token in game_board.upper_occupied_hexes or \
+    #             (defeats_token in game_board.upper_occupied_hexes and 
+    #             len(game_board.lower_tokens[token.defeated_by] ) > 0)
+    #         ):
+    #             # upper token cannot be defeated
+    #             continue
+    #         else:
+    #             if [token.symbol] + hex in game_board.upper_occupied_hexes:
+    #                 only_hex = hex
+    #                 continue
+
+    #             # check if block or oppoenent is in hex
+    #             if tuple(hex) in game_board.board_dict:
+    #                 hex_tokens = game_board.board_dict[tuple(hex)]
+    #                 if self.BLOCK not in hex_tokens:
+    #                     if not next_action or token.defeated_by not in hex_tokens:
+    #                         viable_hexes.append(hex)
+                    
+    #                     if next_action and self == token:
+    #                         if not hex_tokens.islower():
+    #                             swing_hexes.append(hex)
+    #             # empty hex
+    #             else:
+    #                 viable_hexes.append(hex)
+
+    #     if len(viable_hexes) == 0 and only_hex != []:
+    #         viable_hexes.append(only_hex)
+            
+    #     return viable_hexes, swing_hexes
+
     def do_action(self, new_hex):
         
+        if self.r == None:
+            return ("THROW", self.symbol, (new_hex[0], new_hex[1]))
+
+
         if self.is_adjacent_hex(new_hex):
             move_type = "SLIDE"
             #print_slide(turn, self.r, self.q, new_hex[0], new_hex[1])

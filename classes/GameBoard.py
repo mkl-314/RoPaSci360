@@ -26,7 +26,7 @@ class GameBoard(object):
         # self.lower_tokens["r"], self.lower_tokens["p"], self.lower_tokens["s"] = self.separate_tokens(self.data["lower"]) 
     
     # formats gameboard data for printing and removes any tokens that are meant to be deleted
-    def updates_board(self, data):
+    def update_board(self, data):
         board_dict = {}
         for (token, positions) in data.items():
             for pos in positions:
@@ -43,9 +43,12 @@ class GameBoard(object):
         return board_dict
 
     def delete_defeated_tokens(self, player_move, opponent_move=None):
-        
-        possible_hex_defeats = [(player_move, self.board_dict[player_move])]
+        possible_hex_defeats = []
+
+        #if player_move in self.board_dict:
+        possible_hex_defeats += [(player_move, self.board_dict[player_move])]
         if opponent_move != None:
+            #if opponent_move in self.board_dict:
             possible_hex_defeats += [(opponent_move, self.board_dict[opponent_move])]
 
         for (hex, symbols) in possible_hex_defeats:
@@ -86,31 +89,15 @@ class GameBoard(object):
     def update(self, my_action, opponent_action):
         self.turn += 1
 
-        # if player_action[0] == "THROW":
-        #     self.data[self.me].append([player_action[1]] + list(player_action[2]))
-        #     self.tokens_in_hand[self.me].remove(player_action[1])
-        # else:
-        #     for upper in self.data[self.me]:
-        #         if upper[1:3] == list(player_action[1]):
-        #             upper[1:3] = list(player_action[2])
-        #             break
-
-        # if opponent_action != None:
-        #     if opponent_action[0] == "THROW":
-        #         self.data[self.opponent].append([opponent_action[1]] + list(opponent_action[2]))
-        #         self.tokens_in_hand[self.opponent].remove(opponent_action[1])
-        #     else:
-        #         for upper in self.data[self.opponent]:
-        #             if upper[1:3] == list(opponent_action[1]):
-        #                 upper[1:3] = list(opponent_action[2])
-        #                 break
         self.update_token(self.me, my_action)
         self.update_token(self.opponent, opponent_action)
 
 
-        self.board_dict = self.updates_board(self.data)
+        self.board_dict = self.update_board(self.data)
         if opponent_action != None:
             self.delete_defeated_tokens(my_action[2], opponent_move= opponent_action[2])
+        else:
+            self.delete_defeated_tokens(my_action[2])
         # {"upper": [("p", (r, q))], "lower": []}
         self.data = self.convert_to_data(self.board_dict)
 
@@ -130,20 +117,13 @@ class GameBoard(object):
     def apply_action(self, token, action):
 
         new_game_board = copy.deepcopy(self)
-        new_game_board.turn += 1
         
-        # TODO add throw logic
-
-        new_game_board.update( ("NOT_THROW", (token.r, token.q), (action[0], action[1])), None)
-
-        # for old_token in new_game_board.data[self.me]:
-        #     if token.convert_to_list() == old_token and action != None:
-        #         old_token[1:3] = action
-                
-        #         return new_game_board
-        
-        # # Throw move
-        # new_game_board.data[self.player].append(token.convert_to_list())
+        if token.r == None:
+            # Throw move
+            new_game_board.update( ("THROW", token.symbol, action), None)
+        else:
+            # Slide and Swing moves
+            new_game_board.update( ("NOT_THROW", (token.r, token.q), (action[0], action[1])), None)
 
         return new_game_board
 
@@ -152,8 +132,9 @@ class GameBoard(object):
         # count my tokens to their tokens + positioning + location
         # Heuristics? - using would mean halving distance as swing moves may occur
     def eval(self):
-        value = len(self.data[self.me]) + len(self.tokens_in_hand[self.me]) - len(self.data[self.opponent]) - len(self.tokens_in_hand[self.opponent])
-        
+        value = len(self.data[self.me]) - len(self.data[self.opponent])
+        value += len(self.tokens_in_hand[self.me]) - len(self.tokens_in_hand[self.opponent])
+        value += - len(self.tokens_in_hand[self.me]) * 0.1
         return value
 
 
