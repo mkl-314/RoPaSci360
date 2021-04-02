@@ -1,4 +1,5 @@
 from classes.Token import Token
+from moves.throw_move import throwable_hexes
 from math import inf
 
 CUT_OFF_LIMIT = 1
@@ -13,13 +14,6 @@ def minimax_manager(game):
 def max_value(state, game, a, b):
     if state.turn - game.turn >= CUT_OFF_LIMIT:
         return state.eval(), None
-    
-    # for s in successors(state, True):
-    #     a = max(a, min_value(s, game, a, b))
-    #     if a >= b:
-    #         return b
-    
-    # return a
 
     val = -inf 
     for s in actions(state, True):
@@ -29,7 +23,7 @@ def max_value(state, game, a, b):
             val, move = a_temp, s[1:3]
             a = max(val, a)
 
-        if val <= a:
+        if val >= b:
             return val, move 
     
     return val, move
@@ -54,11 +48,6 @@ def min_value(state, game, a, b):
             return val, move 
 
     return val, move
-    # for s in successors(state, False):
-    #     b = min(b, max_value(s, game, a, b))
-    #     if a >= b:
-    #         return a
-
 
 '''
     Find all viable moves
@@ -76,9 +65,16 @@ def actions(state, max_val):
         token_type = state.opponent
 
     # TODO Throw moves
+    for hex in throwable_hexes(state):
+        for token in set(state.tokens_in_hand[token_type]):
+            player = Token([token, None, None], token_type == "upper")
 
+            new_state = state.apply_action(player, hex)
+            next_states.append( [new_state, player, hex])
+
+    # Slide and Swing moves
     for token in tokens:
-        player = Token(token, token_type)
+        player = Token(token, token_type == "upper")
         player_actions = player.viable_actions(state, True)
 
         for player_action in player_actions:
