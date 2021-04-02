@@ -1,7 +1,8 @@
 import sys
-from util import print_board, print_slide, print_swing
-from Token import Token
-from GameBoard import GameBoard
+from search.util import print_board, print_slide, print_swing
+from search.Token import Token
+from search.GameBoard import GameBoard
+from itertools import permutations
 
 '''
 bfs function derived from
@@ -29,15 +30,28 @@ def do_tokens_turn(turn, game_board):
     new_upper_tokens = []
     upper_tokens = game_board.data["upper"]
 
-    for upper in upper_tokens:
-        upper_token = Token(upper, True)
-        
-        new_upper_token = do_token_turn(turn, upper_token, game_board)
+    for perm_upper_token in list(permutations(upper_tokens)):
+        for upper in perm_upper_token:
+            upper_token = Token(upper, True)
+            
+            new_upper_token = do_token_turn(turn, upper_token, game_board)
 
-        new_upper_tokens.append(new_upper_token)
+            if new_upper_token == None:
+                new_upper_tokens.clear()
+                game_board.upper_occupied_hexes.clear()
+                break
 
+            new_upper_tokens.append(new_upper_token)
 
-    return new_upper_tokens
+        if new_upper_tokens != []:
+            break
+    
+    upper_tokens_list = []
+    for upper_token in new_upper_tokens:
+        upper_token.do_action(turn)
+        upper_tokens_list.append(upper_token.convert_to_list())
+
+    return upper_tokens_list
 
 def do_token_turn(turn, upper_token, game_board):
     lower_tokens = game_board.lower_tokens[upper_token.defeats]
@@ -53,11 +67,13 @@ def do_token_turn(turn, upper_token, game_board):
         else:
             new_hex = closest_lower_token_path(game_board, upper_token, game_board.data["lower"], avoid_token=True)
 
+    if new_hex == [-5, -5]:
+        return None
 
-    upper_token.do_action(turn, new_hex)
+    upper_token.set_new_hex(new_hex)
     game_board.upper_occupied_hexes.append( [upper_token.symbol] + new_hex)
 
-    return upper_token.convert_to_list()
+    return upper_token
 
 # Finds the path to the closest lower_token and returns the next move
 def closest_lower_token_path(game_board, upper_token, lower_tokens, avoid_token=False):
@@ -130,7 +146,11 @@ def bfs(game_board, upper_token, lower_token):
         # Token should always be able to move
         # Token will need to be defeated if it can't move / defeat another token
         if len(viable_actions) == 0 and next_action:
-            return 0, [token_defeat(upper_token, game_board)]
+            if len(game_board.upper_tokens[upper_token.symbol]) == 1:
+                return 0, [[-5, -5]]
+            else:
+                game_board.upper_tokens[upper_token.symbol].pop()
+                return 0, [token_defeat(upper_token, game_board)]
         else:
             for next in viable_actions:
                 if tuple(next) not in flood:
