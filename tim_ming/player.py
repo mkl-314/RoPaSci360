@@ -1,5 +1,8 @@
 
 from classes.GameBoard import GameBoard
+from moves.throw_move import *
+from ai.minimax import *
+
 class Player:
     def __init__(self, player):
         """
@@ -11,7 +14,7 @@ class Player:
         as Lower).
         """
         self.player = player
-        self.turn = 1
+        self.turn = 0
         self.game_board = GameBoard(player)
 
 
@@ -20,7 +23,28 @@ class Player:
         Called at the beginning of each turn. Based on the current state
         of the game, select an action to play this turn.
         """
-        # put your code here
+        self.turn += 1
+        
+        hexes = throwable_hexes(self.game_board)
+
+        if self.turn <=3:
+            # Do throw move  
+            symbol = self.game_board.tokens_in_hand[self.player][0]
+            
+            #upper_tokens.append([symbol] + hexes[0])
+            #game_board = game_board.apply_action(Token([symbol] + hexes[0], True), None)
+
+            return ("THROW", symbol, hexes[0])
+        else:
+            move = minimax_manager(self.game_board)
+            #game_board = self.game_board.apply_action(move[0], move[1])
+
+            #move[0].do_action(self.turn, move[1])
+
+            return move[0].do_action(move[1])
+            
+
+        return None
     
     def update(self, opponent_action, player_action):
         """
@@ -30,5 +54,5 @@ class Player:
         The parameter opponent_action is the opponent's chosen action,
         and player_action is this instance's latest chosen action.
         """
-        self.game_board.update_board(player_action, opponent_action)
+        self.game_board.update(player_action, opponent_action)
 

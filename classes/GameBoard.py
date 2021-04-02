@@ -3,28 +3,21 @@ import re
 import copy 
 
 class GameBoard(object):
-    BLOCK = "#"
     token_defeats = ["r", "s", "p"]
 
     def __init__(self, player):
         self.turn = 1
-        self.player = player
-        self.enemy = "lower" if player == "upper" else "upper"
-        self.board_dict = self.updates_board(data)
-        self.data = self.convert_to_data(self.board_dict)
+        self.me = player
+        self.opponent = "lower" if self.me == "upper" else "upper"
+        self.board_dict = {} #self.updates_board(data)
+        # {"upper": [("p", (r, q))], "lower": []}
+        self.data = {"upper": [], "lower": []} #self.convert_to_data(self.board_dict)
         self.upper_occupied_hexes = []
         # AllTokens variables are static at the moment so it won't return accurate data
-        self.all_tokens =  AllTokens()
-        self.my_tokens = []
-        self.enemy_tokens = []
-
-        self.tokens = {"upper": [], "lower": []}
+        #self.all_tokens =  AllTokens()
 
 
-        for token in ["upper", "lower"]:
-            for symbol in ["r", "p", "s"]:
-                for i in range(3):
-                    self.tokens[token].append(Token(symbol, token=="upper"))
+        self.tokens_in_hand = {"upper": ["r", "p", "s"] * 3, "lower": ["r", "p", "s"] * 3}
 
         
         # self.upper_tokens = {}
@@ -37,7 +30,7 @@ class GameBoard(object):
         board_dict = {}
         for (token, positions) in data.items():
             for pos in positions:
-                hex = ( pos[1], pos[2])
+                hex = (pos[1], pos[2])
                 if not hex in board_dict:
                     board_dict[hex] = ""
                     
@@ -45,33 +38,34 @@ class GameBoard(object):
                     board_dict[hex] += pos[0].upper()
                 elif token == "lower":
                     board_dict[hex] += pos[0].lower()
-                else:
-                    board_dict[hex] = self.BLOCK
         
-        board_dict = self.delete_defeated_tokens(board_dict)
+        #board_dict = self.delete_defeated_tokens(board_dict)
         return board_dict
 
-    def delete_defeated_tokens(self, board_dict):
-        for (hex, symbols) in board_dict.items():
+    def delete_defeated_tokens(self, player_move, opponent_move=None):
+        
+        possible_hex_defeats = [(player_move, self.board_dict[player_move])]
+        if opponent_move != None:
+            possible_hex_defeats += [(opponent_move, self.board_dict[opponent_move])]
+
+        for (hex, symbols) in possible_hex_defeats:
             if "r" in symbols.lower() and "p" in symbols.lower() and "s" in symbols.lower():
-                board_dict[hex] = ""
+                self.board_dict[hex] = ""
             else:
                 for i in range(3):
                     if self.token_defeats[i] in symbols.lower() and self.token_defeats[i-1] in symbols.lower():
-                        board_dict[hex] = re.sub(self.token_defeats[i], "", board_dict[hex], flags=re.IGNORECASE)
-        return board_dict
+                        self.board_dict[hex] = re.sub(self.token_defeats[i], "", self.board_dict[hex], flags=re.IGNORECASE)
+        return None
 
     def convert_to_data(self, board_dict):
-        data = {"upper": [], "lower": [], "block": []}
+        data = {"upper": [], "lower": []}
 
         for (hex, symbols) in board_dict.items():
             for symbol in symbols:
-                if symbol == "#":
-                    data["block"].append(["", hex[0], hex[1]])
-                elif symbol.isupper():
-                    data["upper"].append([symbol.lower(), hex[0], hex[1]])
+                if symbol.isupper():
+                    data["upper"].append([symbol.lower(), hex[0], hex[1] ])
                 elif symbol.islower():
-                    data["lower"].append([symbol, hex[0], hex[1]])
+                    data["lower"].append([symbol, hex[0], hex[1] ])
         return data
 
     def separate_tokens(self, tokens):
@@ -89,43 +83,76 @@ class GameBoard(object):
         
         return r_tokens, p_tokens, s_tokens
 
-    def update_board(player_action, opponent_action):
+    def update(self, my_action, opponent_action):
+        self.turn += 1
 
-        if player_action[2] in self.board_dict:
-            self.board_dict[player_action[2]] += []
-        
-        battling_tokens = []
+        # if player_action[0] == "THROW":
+        #     self.data[self.me].append([player_action[1]] + list(player_action[2]))
+        #     self.tokens_in_hand[self.me].remove(player_action[1])
+        # else:
+        #     for upper in self.data[self.me]:
+        #         if upper[1:3] == list(player_action[1]):
+        #             upper[1:3] = list(player_action[2])
+        #             break
 
-        for token in self.tokens[self.player] + self.tokens[self.enemy]:
-            if token.pos == player_action[3] and token.pos == opponent_action[3]:
-                
+        # if opponent_action != None:
+        #     if opponent_action[0] == "THROW":
+        #         self.data[self.opponent].append([opponent_action[1]] + list(opponent_action[2]))
+        #         self.tokens_in_hand[self.opponent].remove(opponent_action[1])
+        #     else:
+        #         for upper in self.data[self.opponent]:
+        #             if upper[1:3] == list(opponent_action[1]):
+        #                 upper[1:3] = list(opponent_action[2])
+        #                 break
+        self.update_token(self.me, my_action)
+        self.update_token(self.opponent, opponent_action)
 
+
+        self.board_dict = self.updates_board(self.data)
+        if opponent_action != None:
+            self.delete_defeated_tokens(my_action[2], opponent_move= opponent_action[2])
+        # {"upper": [("p", (r, q))], "lower": []}
+        self.data = self.convert_to_data(self.board_dict)
+
+    def update_token(self, player, player_action):
+
+        if player_action != None:
+            if player_action[0] == "THROW":
+                self.data[player].append([player_action[1]] + list(player_action[2]))
+                self.tokens_in_hand[player].remove(player_action[1])
+            else:
+                for upper in self.data[player]:
+                    if upper[1:3] == list(player_action[1]):
+                        upper[1:3] = list(player_action[2])
+                        break
 
 
     def apply_action(self, token, action):
 
-        new_data = copy.deepcopy(self.data)
-
-        player = "upper" if token.upper_player else "lower"
+        new_game_board = copy.deepcopy(self)
+        new_game_board.turn += 1
         
-        for old_token in new_data[player]:
-            if token.convert_to_list() == old_token and action != None:
-                old_token[1:3] = action
+        # TODO add throw logic
+
+        new_game_board.update( ("NOT_THROW", (token.r, token.q), (action[0], action[1])), None)
+
+        # for old_token in new_game_board.data[self.me]:
+        #     if token.convert_to_list() == old_token and action != None:
+        #         old_token[1:3] = action
                 
-                return GameBoard(new_data, self.turn + 1)
+        #         return new_game_board
         
-        # Throw move
-        new_data[player].append(token.convert_to_list())
-        return GameBoard(new_data, self.turn + 1)
+        # # Throw move
+        # new_game_board.data[self.player].append(token.convert_to_list())
 
+        return new_game_board
 
 
         # Evaluate the value that the state has
         # count my tokens to their tokens + positioning + location
         # Heuristics? - using would mean halving distance as swing moves may occur
     def eval(self):
-        value = len(self.data["upper"]) - len(self.data["lower"])
-        
+        value = len(self.data[self.me]) + len(self.tokens_in_hand[self.me]) - len(self.data[self.opponent]) - len(self.tokens_in_hand[self.opponent])
         
         return value
 

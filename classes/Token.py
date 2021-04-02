@@ -1,4 +1,4 @@
-from util import print_slide, print_swing
+#from util import print_slide, print_swing
 import math
 
 class Token(object):
@@ -6,11 +6,12 @@ class Token(object):
     possible_neighbours = [ [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0] ]
     token_defeats = ["r", "s", "p"]
     
-    def __init__ (self, symbol, upper_player):
-        self.symbol = symbol
+    def __init__ (self, token, upper_player):
+        self.symbol = token[0]
         self.defeated_by = self.token_defeats[self.token_defeats.index(self.symbol)-1]
         self.defeats = self.token_defeats[self.token_defeats.index(self.symbol)-2]
-        self.pos = None  # (r, q)
+        self.r = token[1]  # (r, q)
+        self.q = token[2]
         self.upper_player = upper_player
         self.defeated = False
 
@@ -79,14 +80,18 @@ class Token(object):
             
         return viable_hexes, swing_hexes
 
-    def do_action(self, turn, new_hex):
+    def do_action(self, new_hex):
         
         if self.is_adjacent_hex(new_hex):
-            print_slide(turn, self.r, self.q, new_hex[0], new_hex[1])
+            move_type = "SLIDE"
+            #print_slide(turn, self.r, self.q, new_hex[0], new_hex[1])
         else:
-            print_swing(turn, self.r, self.q, new_hex[0], new_hex[1])
+            move_type = "SWING"
+            #print_swing(turn, self.r, self.q, new_hex[0], new_hex[1])
 
-        self.update(new_hex)
+        #self.update(new_hex)
+
+        return (move_type, (self.r, self.q), (new_hex[0], new_hex[1]))
         
 
     def is_adjacent_hex(self, new_hex):

@@ -17,7 +17,13 @@ class Player:
         of the game, select an action to play this turn.
         """
         next_move = input("Input turn:")
-        return next_move
+        move = next_move.split(", ")
+        if len(move) == 4:
+            # THROW, p, 2, 2
+            return (move[0], move[1], (int(move[2]), int(move[3])) )
+        else:
+            # SLIDE, 2, 2, 2, 1
+            return (move[0], (int(move[1]), int(move[2])), (int(move[3]), int(move[4])) )
     
     def update(self, opponent_action, player_action):
         """
