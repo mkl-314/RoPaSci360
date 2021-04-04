@@ -7,6 +7,6 @@ COMP30024 Game
 - Write report
 - Improve minimax for simultaneous game play
 - Improve minimax to account for probability
-- 
+- Optimise alg
 
 
