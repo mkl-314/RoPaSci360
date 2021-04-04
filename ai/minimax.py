@@ -65,12 +65,13 @@ def actions(state, my_action):
         token_type = state.opponent
 
     # Throw moves
-    for hex in throwable_hexes(state):
-        for token in set(state.tokens_in_hand[token_type]):
-            player = Token([token, None, None], token_type == "upper")
+    if state.tokens_in_hand[token_type] > 0:
+        for hex in throwable_hexes(state):
+            for token in ["r", "p", "s"]:
+                player = Token([token, None, None], token_type == "upper")
 
-            new_state = state.apply_action(player, hex, my_action)
-            next_states.append( [new_state, player, hex])
+                new_state = state.apply_action(player, hex, my_action)
+                next_states.append( [new_state, player, hex])
 
     # Slide and Swing moves
     for token in tokens:
@@ -83,7 +84,7 @@ def actions(state, my_action):
 
 
     # sort for perfect ordering
-    next_states.sort(key=lambda x: x[0].eval(), reverse= not my_action)
+    #next_states.sort(key=lambda x: x[0].eval(), reverse= not my_action)
 
     return next_states
 

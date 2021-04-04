@@ -46,10 +46,12 @@ class Token(object):
             # check if block or oppoenent is in hex
             if tuple(hex) in game_board.board_dict:
                 hex_tokens = game_board.board_dict[tuple(hex)]
-                viable_hexes.append(hex)
-            
+                if [self.r, self.q] != hex:
+                    viable_hexes.append(hex)
+
                 if next_action and self == token:
-                    if not hex_tokens.islower():
+                    if (not hex_tokens.islower() and self.upper_player) or \
+                        (not hex_tokens.isupper() and not self.upper_player):
                         swing_hexes.append(hex)
             # empty hex
             else:

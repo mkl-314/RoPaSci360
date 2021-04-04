@@ -17,17 +17,18 @@ class Player:
         of the game, select an action to play this turn.
         """
 
-        try
-        next_move = input("Input turn:")
-        move = next_move.split(", ")
-        if len(move) == 4:
-            # THROW, p, 2, 2
-            return ("THROW", move[1], (int(move[2]), int(move[3])) )
-        elif len(move) == 5:
-            # SLIDE, 2, 2, 2, 1
-            return (move[0], (int(move[1]), int(move[2])), (int(move[3]), int(move[4])) )
-        else:
-            raise ValueError("Print correct format")
+        try:
+            next_move = input("Input turn:")
+            move = next_move.replace(" ", "").split(",")
+
+            if len(move) == 4:
+                # THROW, p, 2, 2
+                return ("THROW", move[1], (int(move[2]), int(move[3])) )
+            elif len(move) == 5:
+                # SLIDE, 2, 2, 2, 1
+                return (move[0], (int(move[1]), int(move[2])), (int(move[3]), int(move[4])) )
+            else:
+                raise ValueError("Print correct format")
 
         except:
             print("Print correct format:")

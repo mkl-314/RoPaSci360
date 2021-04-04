@@ -66,7 +66,8 @@ class Token(object):
                     hex_tokens = game_board.board_dict[tuple(hex)]
                     if self.BLOCK not in hex_tokens:
                         if not next_action or token.defeated_by not in hex_tokens:
-                            viable_hexes.append(hex)
+                            if [self.r, self.q] != hex:
+                                viable_hexes.append(hex)
                     
                         if next_action and self == token:
                             if not hex_tokens.islower():

@@ -10,7 +10,7 @@ def throwable_hexes(game_board):
     else:
         flip = -1
 
-    short_range = flip * (len(game_board.tokens_in_hand[game_board.me]) - 5)
+    short_range = flip * (game_board.tokens_in_hand[game_board.me] - 5)
 
     if flip == 1:
         throw_ran = range(short_range, (4+1))
