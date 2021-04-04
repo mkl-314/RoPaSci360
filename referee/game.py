@@ -123,8 +123,14 @@ def play(
 
         # Validate both actions and apply them to the game if they are
         # allowed. Display the resulting game state
-        game.update(action_1, action_2)
-        display_state(game)
+        try:
+            game.update(action_1, action_2)
+            display_state(game)
+        except:
+            print("Incorrect format, try again")
+            action_2 = player_2.action()
+            game.update(action_1, action_2)
+            display_state(game)
 
         # Notify both players of the actions (via .update() methods)
         player_1.update(opponent_action=action_2, player_action=action_1)

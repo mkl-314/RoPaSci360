@@ -54,23 +54,24 @@ def min_value(state, game, a, b):
     try sorting to maximise pruning
     return state (game_board)
 '''
-def actions(state, max_val):
+def actions(state, my_action):
     next_states = []
 
-    if max_val:
+    if my_action:
         tokens = state.data[state.me]
         token_type = state.me
     else: 
         tokens = state.data[state.opponent]
         token_type = state.opponent
 
-    # TODO Throw moves
-    for hex in throwable_hexes(state):
-        for token in set(state.tokens_in_hand[token_type]):
-            player = Token([token, None, None], token_type == "upper")
+    # Throw moves
+    if state.tokens_in_hand[token_type] > 0:
+        for hex in throwable_hexes(state, token_type):
+            for token in ["r", "p", "s"]:
+                player = Token([token, None, None], token_type == "upper")
 
-            new_state = state.apply_action(player, hex)
-            next_states.append( [new_state, player, hex])
+                new_state = state.apply_action(player, hex, my_action)
+                next_states.append( [new_state, player, hex])
 
     # Slide and Swing moves
     for token in tokens:
@@ -78,31 +79,12 @@ def actions(state, max_val):
         player_actions = player.viable_actions(state, True)
 
         for player_action in player_actions:
-                new_state = state.apply_action(player, player_action)
+                new_state = state.apply_action(player, player_action, my_action)
                 next_states.append( [new_state, player, player_action])
-
-    # player_tokens = state.data[state.player]
-    # opponent_tokens = state.data[state.opponent]
-
-    # TODO Throw moves
-
-    # Slide and Swing Moves
-    # for player_token in player_tokens:
-    #     for opponent_token in opponent_tokens:
-    #         player = Token(player_token, state.player == "upper")
-    #         opponent = Token(opponent_token, state.opponent == "upper")
-    #         player_actions = player.viable_actions(state, True)
-    #         opponent_actions = opponent.viable_actions(state, True)
-
-    #         for player_action in player_actions:
-    #             for opponent_action in opponent_actions:
-    #                 new_state = state.apply_action(player, player_action)
-    #                 new_state = new_state.apply_action(opponent, opponent_action)
-    #                 next_states.append( [new_state, player, player_action])
 
 
     # sort for perfect ordering
-    next_states.sort(key=lambda x: x[0].eval(), reverse=max_val)
+    #next_states.sort(key=lambda x: x[0].eval(), reverse= not my_action)
 
     return next_states
 
