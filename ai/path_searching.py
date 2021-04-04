@@ -51,24 +51,42 @@ def eval_tokens_on_board(game_board):
 
 
     game_board.split_token_symbols()
-    heuristic_dist = []
+    h_defeat_dist = []
+    h_defeated_by_dist = []
 
 
     # Evaluate heuristic distance and actual distance of opponents 
     for my_data in game_board.data[game_board.me]:
         my_token = Token(my_data, game_board.me)
         op_defeat_data = game_board.op_tokens[my_token.defeats]
+        op_defeated_by_data = game_board.op_tokens[my_token.defeated_by]
 
         for op_data in op_defeat_data:
             op_token = Token(op_data, game_board.opponent)
 
             h_dist = heuristic(my_token, op_token)
-            heuristic_dist.append(h_dist)
-        
-    if heuristic_dist != []:
-        min_dist = min(heuristic_dist)
-        value += 1/(min_dist+1)      
-        
+            h_defeat_dist.append(h_dist)
+
+        for op_data in op_defeated_by_data:
+            op_token = Token(op_data, game_board.opponent)
+
+            h_dist = heuristic(my_token, op_token)
+            h_defeated_by_dist.append(h_dist)
 
 
+        
+    if h_defeat_dist != []:
+        min_dist = min(h_defeat_dist)
+        value += 0.01*(8-min_dist)      
+        
+    
+    if h_defeated_by_dist != []:
+        min_dist = min(h_defeated_by_dist)
+        value -= 0.01*(8-min_dist)    
+    # Evaluate protection by my tokens
+    # for my_data in game_board.data[game_board.me]:
+    #     my_token = Token(my_data, game_board.me)
+
+        # Protect token that can be taken
+        
     return value

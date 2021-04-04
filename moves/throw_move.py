@@ -2,7 +2,7 @@ def throw_move():
     pass
 
 
-def throwable_hexes(game_board):
+def throwable_hexes(game_board, player):
 
     # Flip board if lower
     if game_board.me == "upper":
@@ -10,7 +10,7 @@ def throwable_hexes(game_board):
     else:
         flip = -1
 
-    short_range = flip * (game_board.tokens_in_hand[game_board.me] - 5)
+    short_range = flip * (game_board.tokens_in_hand[player] - 5)
 
     if flip == 1:
         throw_ran = range(short_range, (4+1))

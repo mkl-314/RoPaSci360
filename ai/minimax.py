@@ -2,7 +2,7 @@ from classes.Token import Token
 from moves.throw_move import throwable_hexes
 from math import inf
 
-CUT_OFF_LIMIT = 2
+CUT_OFF_LIMIT = 1
 
 
 def minimax_manager(game):
@@ -66,7 +66,7 @@ def actions(state, my_action):
 
     # Throw moves
     if state.tokens_in_hand[token_type] > 0:
-        for hex in throwable_hexes(state):
+        for hex in throwable_hexes(state, token_type):
             for token in ["r", "p", "s"]:
                 player = Token([token, None, None], token_type == "upper")
 
