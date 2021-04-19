@@ -2,15 +2,67 @@ from classes.Token import Token
 from moves.throw_move import throwable_hexes
 from math import inf
 import random
+from gametheory import solve_game
+from classes.GameBoard import GameBoard
 
 CUT_OFF_LIMIT = 1
+_DEFEATS = {"r": "s", "p": "r", "s": "p"}
+_DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
+
+
+def heuristic(token1, token2):
+    # Difference in row (negative)
+    x = -token1.r + token2.r
+    # Difference in column
+    y = token1.q - token2.q
+    # Difference of differences
+    d = x - y
+    # Highest absolute is distance
+    return max(abs(x) ,abs(y) ,abs(d))
+
+
+def test_solve():
+    v = []
+
+    game_board = GameBoard("upper")
+
+    game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
+    game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
+    game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
+    game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
+    game_board.update(('THROW', 'r', (0, 0)), ('THROW', 'p', (0, 1)))
+
+    for my_token in game_board.data[game_board.me]:
+        my_tok = Token(my_token, "upper"==game_board.me)
+
+        row = []
+        for op_token in game_board.data[game_board.opponent]:
+            op_tok = Token(op_token, "upper"==game_board.opponent)
+
+            if heuristic(my_tok, op_tok) == 1: # Change to actual distance (i.e. swing moves)
+                if _DEFEATS[my_tok.symbol] == op_tok.symbol:
+                    row.append(0.5)
+                elif _DEFEATED_BY[my_tok.symbol] == op_tok.symbol:
+                    row.append(-0.5)
+            else:
+                row.append(0)
+
+        v.append(row)
+
+
+    print(v)
+    print(solve_game(v))
+
+
 
 
 def minimax_manager(game):
     #value = max_value(game, game, -inf, inf)
+    test_solve()
 
-    value, move = max_value(game, game, -inf, inf)
-    return move
+    #value, move = max_value(game, game, -inf, inf)
+
+    #return move
 
 def max_value(state, game, a, b):
     if state.turn - game.turn >= CUT_OFF_LIMIT:
@@ -22,7 +74,7 @@ def max_value(state, game, a, b):
     for s in actions(state, True):
         a_temp, move2 = min_value(s[0], game, a, b)
 
-        if a_temp >= val:
+        if a_temp > val:
             val, move = a_temp, s[1:3]
             a = max(val, a)
             best_moves.append(move)
@@ -47,7 +99,7 @@ def min_value(state, game, a, b):
     for s in actions(state, False):
         b_temp, move2 = max_value(s[0], game, a, b)
 
-        if b_temp <= val:
+        if b_temp < val:
             val, move = b_temp, s[1:3]
             b = min(val, b)
             best_moves.append(move)

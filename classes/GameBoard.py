@@ -1,7 +1,8 @@
 #from util import print_board
 import re
 import copy
-from ai.path_searching import eval_tokens_on_board
+from ai.path_searching import eval
+import random
 
 class GameBoard(object):
     token_defeats = ["r", "s", "p"]
@@ -12,7 +13,12 @@ class GameBoard(object):
         self.opponent = "lower" if self.me == "upper" else "upper"
         self.board_dict = {}
         self.data = {"upper": [], "lower": []} 
-        self.tokens_in_hand = {"upper": 9, "lower": 9}     
+        self.tokens_in_hand = {"upper": 9, "lower": 9} 
+
+        self.w1 = random.uniform(0,1)
+        self.w2 = random.uniform(0,1)
+        self.w3 = random.uniform(0,1)
+        self.w4 = random.uniform(0,1)
     
     # formats gameboard data by hex
     def update_board(self, data):
@@ -117,11 +123,7 @@ class GameBoard(object):
     # count my tokens to their tokens + positioning + location
     # Heuristics? - using would mean halving distance as swing moves may occur
     def eval(self):
-        value = len(self.data[self.me]) - len(self.data[self.opponent])
-        value += (self.tokens_in_hand[self.me]) - (self.tokens_in_hand[self.opponent])
-
-        value += eval_tokens_on_board(self)
-        return value
+        return eval(self)
 
     def split_token_symbols(self):
         self.my_tokens = {}

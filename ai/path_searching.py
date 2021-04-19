@@ -5,6 +5,9 @@ from classes.Token import Token
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
+
+# 0.5 if piece is next to enemy piece
+
 '''
 Heursitic algorithm to find hex distance between two tokens
 '''
@@ -18,6 +21,41 @@ def heuristic(token1, token2):
     # Highest absolute is distance
     return max(abs(x) ,abs(y) ,abs(d))
 
+def eval(game):
+    value = 0
+
+    value += game.w1 * tokens_on_board(game)
+    value += game.w2 * ((game.tokens_in_hand[game.me]) - (game.tokens_in_hand[game.opponent]))
+    #value += token_types(game)
+    value += eval_tokens_on_board(game)
+    return value
+
+def tokens_on_board(game):
+    return len(game.data[game.me]) - len(game.data[game.opponent])
+
+def token_types(game):
+
+
+    my_symbols = {"r": 0, "p": 0, "s": 0}
+    op_symbols = {"r": 0, "p": 0, "s": 0}
+    value = 0
+    for my_data in game.data[game.me]:
+        my_symbols[my_data[0]] += 1
+
+
+    for opponent_data in game.data[game.opponent]:
+        op_symbols[opponent_data[0]] += 1
+    
+    for token_type in ["r", "p", "s"]:
+        if my_symbols[token_type] > 0 and op_symbols[_DEFEATS[token_type]] > 0:
+            value += game.w3
+        
+        if my_symbols[token_type] > 0 and op_symbols[_DEFEATED_BY[token_type]] > 0:
+            value -= game.w4
+
+    return value
+
+
 
 def eval_tokens_on_board(game_board):
     value = 0
@@ -25,19 +63,26 @@ def eval_tokens_on_board(game_board):
     my_symbols = {"r": 0, "p": 0, "s": 0}
     op_symbols = {"r": 0, "p": 0, "s": 0}
 
+    my_sorted_tokens = sorted(game_board.data[game_board.me])
     # Evaluate placement of tokens
-    for my_data in game_board.data[game_board.me]:
+    for i in range(len(my_sorted_tokens)):
+        my_data = my_sorted_tokens[i]
         my_token = Token(my_data, game_board.me == "upper")
         value += 0.001 * len(my_token.viable_actions(game_board, True))
+
+        if i > 0 and my_sorted_tokens[i-1] == my_data:
+            value -= 1
 
         my_symbols[my_token.symbol] += 1
 
 
     for opponent_data in game_board.data[game_board.opponent]:
         op_token = Token(opponent_data, game_board.me == "upper")
-        value -= 0.001 * len(op_token.viable_actions(game_board, True))
+        # value -= 0.001 * len(op_token.viable_actions(game_board, True))
 
         op_symbols[op_token.symbol] += 1
+
+    
 
     
     # Evaluate token symbols compared to opponents
