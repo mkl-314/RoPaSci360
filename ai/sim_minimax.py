@@ -1,5 +1,5 @@
 from classes.Token import Token
-from moves.throw_move import throwable_hexes
+from moves.throw_move import *
 from math import inf
 import random
 from gametheory import solve_game
@@ -22,6 +22,15 @@ def heuristic(token1, token2):
     # Highest absolute is distance
     return max(abs(x) ,abs(y) ,abs(d))
 
+# Heuristic distance + the swing distance in the next move
+def heuristic_swing(game, token_move, token2):
+    h_dist = heuristic(token_move, token2)
+    if h_dist == 2:
+        if [token2.r, token2.q] in token_move.viable_actions(game, True):
+            h_dist = 1
+
+    return h_dist
+
 
 def test_solve():
     v = []
@@ -34,34 +43,8 @@ def test_solve():
     game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
     game_board.update(('THROW', 'r', (0, 0)), ('THROW', 'p', (0, 1)))
 
-    for my_token in game_board.data[game_board.me]:
-        my_tok = Token(my_token, "upper"==game_board.me)
-
-        row = []
-        for op_token in game_board.data[game_board.opponent]:
-            op_tok = Token(op_token, "upper"==game_board.opponent)
-
-            if heuristic(my_tok, op_tok) == 1: # Change to actual distance (i.e. swing moves)
-                if _DEFEATS[my_tok.symbol] == op_tok.symbol:
-                    row.append(0.5)
-                elif _DEFEATED_BY[my_tok.symbol] == op_tok.symbol:
-                    row.append(-0.5)
-            else:
-                row.append(0)
-
-        v.append(row)
-
-
-    print(v)
-    print(solve_game(v))
-
-
-
 
 def minimax_manager(game):
-
-    #value = max_value(game, game, -inf, inf)
-    #test_solve()
 
     value, move = max_value(game, game, -inf, inf)
     #game_board = GameBoard("upper")
@@ -89,25 +72,27 @@ def max_value(state, game, a, b):
         #MK to implement
         # 
 
-    # op_actions = actions(state, False)
-    # op_best_actions = op_actions[0:10]
+        # op_actions = actions(state, False)
+        # op_best_actions = op_actions[0:10]
+        
+        val = -inf 
+        best_moves = []
+        #best_eval = -inf
+        for s in actions(state, True):
+            a_temp, move2 = min_value(s[0], game, a, b)
 
+            if a_temp > val:
+                val, move = a_temp, s[1:3]
+                a = max(val, a)
+                best_moves = [move]
+            elif a_temp == val:
+                best_moves.append(s[1:3])
 
-    val = -inf 
-    best_moves = []
-    #best_eval = -inf
-    for s in actions(state, True):
-        a_temp, move2 = min_value(s[0], game, a, b)
+            if val >= b:
+                return val, move         
 
-        if a_temp > val:
-            val, move = a_temp, s[1:3]
-            a = max(val, a)
-            best_moves.append(move)
-
-        if val >= b:
-            return val, move         
-
-    move = random.choice(best_moves)
+        move = random.choice(best_moves)
+        #move = best_moves[0]
     return val, move
 
 '''
@@ -149,15 +134,6 @@ def actions(state, my_action):
         tokens = state.data[state.opponent]
         token_type = state.opponent
 
-    # Throw moves
-    if state.tokens_in_hand[token_type] > 0:
-        for hex in throwable_hexes(state, token_type):
-            for token in ["r", "p", "s"]:
-                player = Token([token, None, None], token_type == "upper")
-
-                new_state = state.apply_action(player, hex, my_action)
-                next_states.append( [new_state, player, hex])
-
     # Slide and Swing moves
     for token in tokens:
         player = Token(token, token_type == "upper")
@@ -167,6 +143,14 @@ def actions(state, my_action):
                 new_state = state.apply_action(player, player_action, my_action)
                 next_states.append( [new_state, player, player_action])
 
+    # Throw moves
+    if state.tokens_in_hand[token_type] > 0:
+        for hex in throwable_hexes(state, token_type):
+            for token in ["r", "p", "s"]:
+                player = Token([token, None, None], token_type == "upper")
+
+                new_state = state.apply_action(player, hex, my_action)
+                next_states.append( [new_state, player, hex])
 
     # sort for perfect ordering
     # next_states.sort(key=lambda x: x[0].eval(), reverse= my_action)

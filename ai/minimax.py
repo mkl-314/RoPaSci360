@@ -25,13 +25,13 @@ def max_value(state, game, a, b):
         if a_temp >= val:
             val, move = a_temp, s[1:3]
             a = max(val, a)
-            best_moves.append(move)
+            #best_moves.append(move)
 
         if val >= b:
             return val, move 
     
 
-    move = random.choice(best_moves)
+    #move = random.choice(best_moves)
     return val, move
 
 '''

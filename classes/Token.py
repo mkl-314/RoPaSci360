@@ -50,6 +50,7 @@ class Token(object):
                     viable_hexes.append(hex)
 
                 if next_action and self == token:
+                    # Viability of swing_hex
                     if (not hex_tokens.islower() and self.upper_player) or \
                         (not hex_tokens.isupper() and not self.upper_player):
                         swing_hexes.append(hex)
