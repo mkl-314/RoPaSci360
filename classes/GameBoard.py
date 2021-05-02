@@ -125,10 +125,9 @@ class GameBoard(object):
     def eval(self):
         return eval(self)
 
-    def can_defeat():
+    def can_defeat(self):
         return False
 
-        
     def split_token_symbols(self):
         self.my_tokens = {}
         self.op_tokens = {}
