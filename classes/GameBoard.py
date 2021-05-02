@@ -1,7 +1,8 @@
 #from util import print_board
 import re
 import copy
-from ai.path_searching import eval
+#from ai.path_searching import eval
+from ai.eval import eval
 import random
 
 class GameBoard(object):

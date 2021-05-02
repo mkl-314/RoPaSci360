@@ -1,12 +1,9 @@
-# import math 
+import math 
 from classes.Token import Token
-
+from moves.throw_move import *
 
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
-
-
-# 0.5 if piece is next to enemy piece
 
 '''
 Heursitic algorithm to find hex distance between two tokens
@@ -21,14 +18,30 @@ def heuristic(token1, token2):
     # Highest absolute is distance
     return max(abs(x) ,abs(y) ,abs(d))
 
+# Heuristic distance + the swing distance in the next move
+def heuristic_swing(game, token_move, token2):
+    h_dist = heuristic(token_move, token2)
+    if h_dist == 2:
+        if [token2.r, token2.q] in token_move.viable_actions(game, True):
+            h_dist = 1
+
+    return h_dist
+
 def eval(game):
     value = 0
 
-    value += 1 * tokens_on_board(game)
-    value += 1 * tokens_in_hand(game)
+    value += 10 * tokens_on_board(game)
+    value += 10 * tokens_in_hand(game)
     #value += token_types(game)
-    value += eval_tokens_on_board(game)
+    value += 1 * defeat_token_distance(game)
+
+    if game.tokens_in_hand[game.opponent] > 0:
+        value += 1 * token_board_progression(game)
+
+    value += 10 * eval_tokens_on_board(game)
     return value
+
+
 
 def tokens_on_board(game):
     return len(game.data[game.me]) - len(game.data[game.opponent])
@@ -59,6 +72,56 @@ def token_types(game):
             value -= game.w4
 
     return value
+
+def token_board_progression(game):
+    value = 0
+
+    if game.me == "upper":
+        my_initial_row = 4
+    else:
+        my_initial_row = -4
+
+    for my_data in game.data[game.me]: 
+        value += 8 - abs(my_initial_row - my_data[1])
+
+    for op_data in game.data[game.opponent]: 
+        value -= 8 - abs(-1 * my_initial_row - op_data[1])
+
+    return value / (len(game.data[game.me]) + len(game.data[game.opponent]))
+
+def defeat_token_distance(game):
+
+    def token_distances(game, player):
+        value = 0
+        if player == game.me:
+            enemy = game.opponent
+        else:
+            enemy = game.me
+
+        if len(game.data[enemy]) > 0:
+            for enemy_data in game.data[enemy]:
+                enemy_token = Token(enemy_data, enemy == "upper")
+                
+                min_distance = math.inf
+
+                for player_data in game.data[player]:
+                    player_token = Token(player_data, player == "upper")
+
+                    if enemy_token.defeated_by == player_token.symbol:
+
+                        distance = heuristic_swing(game, player_token, enemy_token)
+                        # Find min distance
+                        if distance < min_distance:
+                            min_distance = distance
+
+                if min_distance != math.inf:
+                    value += 8 - min_distance
+            
+            return value / len(game.data[enemy])
+        
+        return value
+
+    return token_distances(game, game.me) - token_distances(game, game.opponent)
 
 
 
