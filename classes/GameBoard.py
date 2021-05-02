@@ -15,10 +15,10 @@ class GameBoard(object):
         self.data = {"upper": [], "lower": []} 
         self.tokens_in_hand = {"upper": 9, "lower": 9} 
 
-        self.w1 = random.uniform(0,1)
-        self.w2 = random.uniform(0,1)
-        self.w3 = random.uniform(0,1)
-        self.w4 = random.uniform(0,1)
+        # self.w1 = random.uniform(0,1)
+        # self.w2 = random.uniform(0,1)
+        # self.w3 = random.uniform(0,1)
+        # self.w4 = random.uniform(0,1)
     
     # formats gameboard data by hex
     def update_board(self, data):

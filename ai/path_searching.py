@@ -24,8 +24,8 @@ def heuristic(token1, token2):
 def eval(game):
     value = 0
 
-    value += game.w1 * tokens_on_board(game)
-    value += game.w2 * ((game.tokens_in_hand[game.me]) - (game.tokens_in_hand[game.opponent]))
+    value += 1 * tokens_on_board(game)
+    value += 1 * ((game.tokens_in_hand[game.me]) - (game.tokens_in_hand[game.opponent]))
     #value += token_types(game)
     value += eval_tokens_on_board(game)
     return value
@@ -33,6 +33,8 @@ def eval(game):
 def tokens_on_board(game):
     return len(game.data[game.me]) - len(game.data[game.opponent])
 
+
+# Ensure my token can defeat any of opponents tokens
 def token_types(game):
 
 

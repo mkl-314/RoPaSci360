@@ -1,7 +1,7 @@
 
 from classes.GameBoard import GameBoard
 from moves.throw_move import *
-from ai.minimax import *
+from ai.sim_minimax import *
 
 
 
@@ -19,16 +19,16 @@ class Player:
         self.turn = 0
         self.game_board = GameBoard(player)
 
-        if player == "upper":
-            self.game_board.w1 = 0.7
-            self.game_board.w2 = 0.9
-            self.game_board.w3 = 0.3
-            self.game_board.w4 = 0.3
-        else:
-            self.game_board.w1 = 1
-            self.game_board.w2 = 1
-            self.game_board.w3 = 0.1
-            self.game_board.w4 = 0.1
+        # if player == "upper":
+        #     self.game_board.w1 = 0.7
+        #     self.game_board.w2 = 0.9
+        #     self.game_board.w3 = 0.3
+        #     self.game_board.w4 = 0.3
+        # else:
+        #     self.game_board.w1 = 1
+        #     self.game_board.w2 = 1
+        #     self.game_board.w3 = 0.1
+        #     self.game_board.w4 = 0.1
 
         # w1 needs to be higher than everything else
         # w2 needs to be low
