@@ -63,19 +63,19 @@ def min_value(state, game, a, b):
     try sorting to maximise pruning
     return state (game_board)
 '''
-def actions(state, my_action):
+def actions(state, my_action): 
     next_states = []
 
     if my_action:
         tokens = state.data[state.me]
-        token_type = state.me
+        token_type = state.me 
     else: 
         tokens = state.data[state.opponent]
-        token_type = state.opponent
+        token_type = state.opponent 
 
     # Slide and Swing moves
     for token in tokens:
-        player = Token(token, token_type == "upper")
+        player = Token(token, token_type == "upper") 
         player_actions = player.viable_actions(state, True)
 
         for player_action in player_actions:
