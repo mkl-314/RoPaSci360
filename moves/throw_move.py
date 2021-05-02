@@ -5,7 +5,7 @@ def throw_move():
 def throwable_hexes(game_board, player):
 
     # Flip board if lower
-    if game_board.me == "upper":
+    if player == "upper":
         flip = 1
     else:
         flip = -1

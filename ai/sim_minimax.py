@@ -64,6 +64,11 @@ def minimax_manager(game):
     #test_solve()
 
     value, move = max_value(game, game, -inf, inf)
+    #game_board = GameBoard("upper")
+    # game_board.update(('THROW', 'r', (0, 0)), ('THROW', 'p', (0, 1)))
+
+    #array, my_moves = create_array(game_board)
+    # print(array)
 
     return move
 
@@ -73,12 +78,14 @@ def max_value(state, game, a, b):
     
     # Timmy to implement
     # Find best option to take or avoid being taken
-    if state.can_defeat():
-        array, my_moves = create_array()
-        prob_array, v = solve_game(array)
-        
-        return v, None
+    if True:
+        array, my_moves = create_array(state)
+        print(array)
+        # prob_array, v = solve_game(array)
+        # print(prob_array)
+        # return v, None
     else:
+        pass
         #MK to implement
         # 
 
@@ -89,7 +96,7 @@ def max_value(state, game, a, b):
     val = -inf 
     best_moves = []
     #best_eval = -inf
-    for s in actions(op_action[0], True):
+    for s in actions(state, True):
         a_temp, move2 = min_value(s[0], game, a, b)
 
         if a_temp > val:
@@ -137,7 +144,7 @@ def actions(state, my_action):
 
     if my_action:
         tokens = state.data[state.me]
-        token_type = state.me
+        token_type = state.me # lower
     else: 
         tokens = state.data[state.opponent]
         token_type = state.opponent
