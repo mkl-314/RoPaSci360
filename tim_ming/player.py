@@ -1,7 +1,7 @@
 
 from classes.GameBoard import GameBoard
 from moves.throw_move import *
-from ai.minimax import *
+from ai.sim_minimax import *
 
 
 
