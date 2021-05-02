@@ -54,6 +54,19 @@ def actions(state, my_action):
 
 def create_array():
     # Timmmy to do
+    A = np.array([
+        [  -1,  0 ],
+        [ 0,  -1 ],
+        [0, 0]
+    ])
+    
+    array = solve_game(A, maximiser=True, rowplayer=True)
+    array_round = [round(elem, 2) for elem in array[0]]
+
+    #print("soln:", array)
+    print("soln:", array_round)
+    print(round( array[1], 2))
+
     pass 
 
 
