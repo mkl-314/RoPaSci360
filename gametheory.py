@@ -60,7 +60,8 @@ def solve_game(V, maximiser=True, rowplayer=True):
         b_ub=-np.ones(m),
     )
     if res.status:
-        raise OptimisationError(res.message) # TODO: propagate whole result
+        return None, None
+        #raise OptimisationError(res.message) # TODO: propagate whole result
     # compute startegy and value
     v = 1 / res.x.sum()
     s = res.x * v

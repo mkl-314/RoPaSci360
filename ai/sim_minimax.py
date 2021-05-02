@@ -61,38 +61,62 @@ def max_value(state, game, a, b):
     
     # Timmy to implement
     # Find best option to take or avoid being taken
-    if True:
-        array, my_moves = create_array(state)
-        print(array)
-        # prob_array, v = solve_game(array)
-        # print(prob_array)
-        # return v, None
-    else:
-        pass
+    array, my_moves = create_array(state)
+    #print(array)
+    if array != []:
+        prob_array, v = solve_game(array)
+        if v != None:
+            array_round = [round(elem, 2) for elem in prob_array]
+            print(array)
+            for move in my_moves:
+                print("Next:")
+                print(move[1].symbol + ': ' + str(move[1].r) + ' ' + str(move[1].q))
+                print(move[2])
+
+            print(array_round)
+            print("v: " + str(v))
+
+            move_index = random.choices(range(len(my_moves)), weights=array_round )
+            my_move = my_moves[move_index[0]]
+            my_token_action = my_move[1].do_action(my_move[2])
+            #print(my_token_action)
+
+            return round(v, 5), my_move[1:3]
+
+    # if state.can_defeat():
+    #     pass
+    #     array, my_moves = create_array(state)
+    #     # print(array)
+    #     prob_array, v = solve_game(array)
+    #     print(prob_array)
+    #     print("v: " + str(v))
+    #     my_move = random.choices(my_moves, weights=prob_array )
+    #     my_token_action = my_move[1].do_action(my_move[2])
+    #     print(my_token_action)
+
+    #     # return v, None
+    # else:
         #MK to implement
-        # 
 
-        # op_actions = actions(state, False)
-        # op_best_actions = op_actions[0:10]
-        
-        val = -inf 
-        best_moves = []
-        #best_eval = -inf
-        for s in actions(state, True):
-            a_temp, move2 = min_value(s[0], game, a, b)
+    val = -inf 
+    best_moves = []
+    #best_eval = -inf
+    for s in actions(state, True):
+        a_temp, move2 = min_value(s[0], game, a, b)
 
-            if a_temp > val:
-                val, move = a_temp, s[1:3]
-                a = max(val, a)
-                best_moves = [move]
-            elif a_temp == val:
-                best_moves.append(s[1:3])
+        if a_temp > val:
+            val, move = a_temp, s[1:3]
+            a = max(val, a)
+            best_moves = [move]
+        elif a_temp == val:
+            best_moves.append(s[1:3])
 
-            if val >= b:
-                return val, move         
+        if val >= b:
+            return val, move         
 
-        move = random.choice(best_moves)
-        #move = best_moves[0]
+    #move = random.choice(best_moves)
+    move = best_moves[0]
+
     return val, move
 
 '''
