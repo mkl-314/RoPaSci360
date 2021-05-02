@@ -4,6 +4,8 @@ from math import inf
 import random
 from gametheory import solve_game
 from classes.GameBoard import GameBoard
+import numpy as np
+from ai.equal_strategy import *
 
 CUT_OFF_LIMIT = 1
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
@@ -57,31 +59,66 @@ def test_solve():
 
 
 def minimax_manager(game):
+    A = np.array([
+        [  -1,  0 ],
+        [ 0,  -1 ],
+        [0, 0]
+    ])
+    
+    array = solve_game(A, maximiser=True, rowplayer=True)
+    array_round = [round(elem, 2)) for elem in array[0]]
+
+    #print("soln:", array)
+    print("soln:", array_round)
+    print(round( array[1], 2))
+
+
     #value = max_value(game, game, -inf, inf)
-    test_solve()
+    #test_solve()
 
-    #value, move = max_value(game, game, -inf, inf)
+    value, move = max_value(game, game, -inf, inf)
 
-    #return move
+    return move
 
 def max_value(state, game, a, b):
     if state.turn - game.turn >= CUT_OFF_LIMIT:
         return state.eval(), None
+    
+    # Timmy to implement
+    if state.can_defeat():
+        array, my_moves = create_array()
+        prob_array, v = solve_game(array)
+        
+        return v, None
+    else:
+        #MK to implement
+
+    op_actions = actions(state, False)
+
+    
+    op_best_actions = op_actions[0:10]
+
 
     val = -inf 
     best_moves = []
+    best_eval = -inf
+    for op_action in op_best_actions:
+        for s in actions(op_action[0], True):
+            # a_temp, move2 = min_value(s[0], game, a, b)
 
-    for s in actions(state, True):
-        a_temp, move2 = min_value(s[0], game, a, b)
+            # if a_temp > val:
+            #     val, move = a_temp, s[1:3]
+            #     a = max(val, a)
+            #     best_moves.append(move)
 
-        if a_temp > val:
-            val, move = a_temp, s[1:3]
-            a = max(val, a)
-            best_moves.append(move)
-
-        if val >= b:
-            return val, move 
-    
+            # if val >= b:
+            #     return val, move 
+            if s[0].eval() > best_eval:
+                best_moves = [s[1:3]]
+                best_eval = s[0].eval()
+            elif s[0].eval() == best_eval:
+                best_moves.append(s[1:3])
+        
 
     move = random.choice(best_moves)
     return val, move
@@ -145,7 +182,7 @@ def actions(state, my_action):
 
 
     # sort for perfect ordering
-    #next_states.sort(key=lambda x: x[0].eval(), reverse= not my_action)
+    # next_states.sort(key=lambda x: x[0].eval(), reverse= my_action)
 
     return next_states
 
