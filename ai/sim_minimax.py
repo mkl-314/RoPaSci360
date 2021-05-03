@@ -34,13 +34,7 @@ def heuristic_swing(game, token_move, token2):
 
 
 def test_solve():
-    v = []
-
     game_board = GameBoard("upper")
-
-    game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
-    game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
-    game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
     game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
     game_board.update(('THROW', 'r', (0, 0)), ('THROW', 'p', (0, 1)))
 
@@ -56,89 +50,31 @@ def minimax_manager(game):
 
     return move
 
-
-def equilibrium_strategy(state, game, value):
-
-    if state.turn - game.turn >= E_CUT_OFF_LIMIT:
-        array, my_moves = equilibrium_eval(state)
-
-
-        #print(array)
-        if array != []:
-            prob_array, v = solve_game(array)
-            if v != None:
-                prob_array = [round(elem, 2) for elem in prob_array]
-                # print(array)
-                # print(prob_array)
-                # print("v: " + str(v))
-
-
-                move_index = random.choices(range(len(my_moves)), weights=prob_array)
-                my_move = my_moves[move_index[0]]
-                #my_token_action = my_move[1].do_action(my_move[2])
-                #print(my_token_action)
-
-                return round(v, 5), my_move
-
-        return None, None
-    
-    else:
-        array, my_moves = equilibrium_eval(state)
-
-        if my_moves == []:
-            return None, None
-
-        for move in my_moves:
-            new_val, new_move = equilibrium_strategy(move[0], game, value)
-
-            if new_val == None:
-                return None, None
-
-            if new_val > value:
-                value = new_val
-                my_move = move[1:3]
-                print(value)
-
-        if state.turn == game.turn:
-            t=1
-
-        #value, my_move = equilibrium_strategy(state, game, value)
-
-        return value, my_move
-
 def max_value(state, game, a, b):
     if state.turn - game.turn >= CUT_OFF_LIMIT:
         return state.eval(), None
     
     val = -inf 
 
+    # Apply when tokens are attacking
     val, my_move = equilibrium_strategy(state, game, val)
-    if val != None:
-        return val, my_move
-    # Timmy to implement
-    # Find best option to take or avoid being taken
-    # array, my_moves = equilibrium_eval(state)
-    # #print(array)
-    # if array != []:
-    #     prob_array, v = solve_game(array)
-    #     if v != None:
-    #         array_round = [round(elem, 2) for elem in prob_array]
-    #         print(array)
-    #         #for move in my_moves:
-    #             # print("Next:")
-    #             # print(move[1].symbol + ': ' + str(move[1].r) + ' ' + str(move[1].q))
-    #             # print(move[2])
+    if val != None and my_move != None:
 
-    #         print(array_round)
-    #         print("v: " + str(v))
+        # if my_move[0] == None:
+        #     # my_move[1] = token runs away
+        #     run_away_token = my_move[1]
+            
+        #     val = -inf
 
-    #         move_index = random.choices(range(len(my_moves)), weights=array_round )
-    #         my_move = my_moves[move_index[0]]
-    #         my_token_action = my_move[1].do_action(my_move[2])
-    #         #print(my_token_action)
+        #     player_actions = run_away_token.viable_actions(state, True)
+        #     for player_action in player_actions:
+        #         new_state = state.apply_action(run_away_token, player_action, True)
 
-    #         return round(v, 5), my_move[1:3]
-
+        #         if new_state.eval() > val:
+        #             my_move = [new_state, run_away_token, player_action]
+        print("equilibrium")
+        return val, my_move[1:3]
+    print("minimax")
     val = -inf
     best_moves = []
     #best_eval = -inf
@@ -165,6 +101,8 @@ return value, action
 
 '''
 def min_value(state, game, a, b):
+    #state.turn -= 1
+
     if state.turn - game.turn >= CUT_OFF_LIMIT:
         return state.eval(), None
     
