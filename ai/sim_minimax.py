@@ -8,6 +8,7 @@ import numpy as np
 from ai.equal_strategy import *
 
 CUT_OFF_LIMIT = 1
+E_CUT_OFF_LIMIT = 1
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
@@ -55,50 +56,90 @@ def minimax_manager(game):
 
     return move
 
+
+def equilibrium_strategy(state, game, value):
+
+    if state.turn - game.turn >= E_CUT_OFF_LIMIT:
+        array, my_moves = equilibrium_eval(state)
+
+
+        #print(array)
+        if array != []:
+            prob_array, v = solve_game(array)
+            if v != None:
+                prob_array = [round(elem, 2) for elem in prob_array]
+                # print(array)
+                # print(prob_array)
+                # print("v: " + str(v))
+
+
+                move_index = random.choices(range(len(my_moves)), weights=prob_array)
+                my_move = my_moves[move_index[0]]
+                #my_token_action = my_move[1].do_action(my_move[2])
+                #print(my_token_action)
+
+                return round(v, 5), my_move
+
+        return None, None
+    
+    else:
+        array, my_moves = equilibrium_eval(state)
+
+        if my_moves == []:
+            return None, None
+
+        for move in my_moves:
+            new_val, new_move = equilibrium_strategy(move[0], game, value)
+
+            if new_val == None:
+                return None, None
+
+            if new_val > value:
+                value = new_val
+                my_move = move[1:3]
+                print(value)
+
+        if state.turn == game.turn:
+            t=1
+
+        #value, my_move = equilibrium_strategy(state, game, value)
+
+        return value, my_move
+
 def max_value(state, game, a, b):
     if state.turn - game.turn >= CUT_OFF_LIMIT:
         return state.eval(), None
     
+    val = -inf 
+
+    val, my_move = equilibrium_strategy(state, game, val)
+    if val != None:
+        return val, my_move
     # Timmy to implement
     # Find best option to take or avoid being taken
-    array, my_moves = create_array(state)
-    #print(array)
-    if array != []:
-        prob_array, v = solve_game(array)
-        if v != None:
-            array_round = [round(elem, 2) for elem in prob_array]
-            print(array)
-            for move in my_moves:
-                print("Next:")
-                print(move[1].symbol + ': ' + str(move[1].r) + ' ' + str(move[1].q))
-                print(move[2])
-
-            print(array_round)
-            print("v: " + str(v))
-
-            move_index = random.choices(range(len(my_moves)), weights=array_round )
-            my_move = my_moves[move_index[0]]
-            my_token_action = my_move[1].do_action(my_move[2])
-            #print(my_token_action)
-
-            return round(v, 5), my_move[1:3]
-
-    # if state.can_defeat():
-    #     pass
-    #     array, my_moves = create_array(state)
-    #     # print(array)
+    # array, my_moves = equilibrium_eval(state)
+    # #print(array)
+    # if array != []:
     #     prob_array, v = solve_game(array)
-    #     print(prob_array)
-    #     print("v: " + str(v))
-    #     my_move = random.choices(my_moves, weights=prob_array )
-    #     my_token_action = my_move[1].do_action(my_move[2])
-    #     print(my_token_action)
+    #     if v != None:
+    #         array_round = [round(elem, 2) for elem in prob_array]
+    #         print(array)
+    #         #for move in my_moves:
+    #             # print("Next:")
+    #             # print(move[1].symbol + ': ' + str(move[1].r) + ' ' + str(move[1].q))
+    #             # print(move[2])
 
-    #     # return v, None
-    # else:
-        #MK to implement
+    #         print(array_round)
+    #         print("v: " + str(v))
 
-    val = -inf 
+    #         move_index = random.choices(range(len(my_moves)), weights=array_round )
+    #         my_move = my_moves[move_index[0]]
+    #         my_token_action = my_move[1].do_action(my_move[2])
+    #         #print(my_token_action)
+
+    #         return round(v, 5), my_move[1:3]
+
+    val = -inf
     best_moves = []
     #best_eval = -inf
     for s in actions(state, True):

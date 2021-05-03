@@ -108,20 +108,8 @@ def defeat_actions(state, my_action):
 
     return next_states
 
-def create_array(state):
-    # Timmy to do
-    # A = np.array([
-    #     [  -1,  0 ],
-    #     [ 0,  -1 ],
-    #     [0, 0]
-    # ])
-    
-    # array = solve_game(A, maximiser=True, rowplayer=True)
-    # array_round = [round(elem, 2) for elem in array[0]]
+def equilibrium_eval(state):
 
-    #print("soln:", array)
-    # print("soln:", array_round)
-    # print(round( array[1], 2))
     score_rows = [] # each row our action
     row_actions = [] # action for later use
 
@@ -138,17 +126,16 @@ def create_array(state):
         row_actions.append(my_action) # add this action to action array
 
         for op_action in op_defeat_actions:
-            if state.turn == 7:
-                print(op_action[1].symbol)
-                print(op_action[2])
 
             my_token_action = my_action[1].do_action(my_action[2])
             op_token_action = op_action[1].do_action(op_action[2])
 
             new_state = state.update_copy(my_token_action, op_token_action)
 
-            score = len(new_state.data[state.me]) - len(state.data[state.me]) # score = how many our token gained (negative if lost)
-            score += len(state.data[state.opponent]) - len(new_state.data[state.opponent]) # score + how many enemy lost (negative if gain)
+            score = len(new_state.data[state.me]) - len(state.data[state.me])
+            score += len(state.data[state.opponent]) - len(new_state.data[state.opponent]) 
+            score += 1.5 * (new_state.tokens_in_hand[state.me] -state.tokens_in_hand[state.me])
+            score += 0.5 * (state.tokens_in_hand[state.opponent] -new_state.tokens_in_hand[state.opponent])
             score_row.append(score) # add row to matrix
 
         score_rows.append(score_row)
