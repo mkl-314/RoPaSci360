@@ -1,7 +1,7 @@
 import math 
 from classes.Token import Token
 from moves.throw_move import *
-
+from ai.heuristic import *
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
