@@ -110,10 +110,8 @@ def equilibrium_eval(state):
 
             new_state = state.update_copy(my_token_action, op_token_action)
 
-            score = len(new_state.data[state.me]) - len(state.data[state.me])
-            score += len(state.data[state.opponent]) - len(new_state.data[state.opponent]) 
-            score += 1.3 * (new_state.tokens_in_hand[state.me] -state.tokens_in_hand[state.me])
-            score += 1.3 * (state.tokens_in_hand[state.opponent] -new_state.tokens_in_hand[state.opponent])
+            score = calc_score(new_state, state)
+
             score_row.append(score) # add row to matrix
             row_action.append([new_state] + my_action[1:3])
 
@@ -123,6 +121,14 @@ def equilibrium_eval(state):
     score_rows_output = np.array(score_rows)
     return score_rows_output, all_actions 
 
+def calc_score(new_state, state):
+
+    score = len(new_state.data[state.me]) - len(state.data[state.me])
+    score += len(state.data[state.opponent]) - len(new_state.data[state.opponent]) 
+    score += 1.3 * (new_state.tokens_in_hand[state.me] -state.tokens_in_hand[state.me])
+    score += 1.3 * (state.tokens_in_hand[state.opponent] -new_state.tokens_in_hand[state.opponent])
+
+    return score
 
 
 # Recursive Backward Induction Algorithm
