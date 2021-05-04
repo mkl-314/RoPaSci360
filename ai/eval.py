@@ -30,8 +30,8 @@ def heuristic_swing(game, token_move, token2):
 def eval(game):
     value = 0
 
-    value += 10 * tokens_on_board(game)
-    value += 10 * tokens_in_hand(game)
+    # value += 10 * tokens_on_board(game)
+    # value += 10 * tokens_in_hand(game)
     #value += token_types(game)
     value += 1 * defeat_token_distance(game)
 

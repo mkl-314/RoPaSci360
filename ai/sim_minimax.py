@@ -6,31 +6,12 @@ from gametheory import solve_game
 from classes.GameBoard import GameBoard
 import numpy as np
 from ai.equal_strategy import *
+from ai.heuristic import *
 
 CUT_OFF_LIMIT = 1
 E_CUT_OFF_LIMIT = 1
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
-
-
-def heuristic(token1, token2):
-    # Difference in row (negative)
-    x = -token1.r + token2.r
-    # Difference in column
-    y = token1.q - token2.q
-    # Difference of differences
-    d = x - y
-    # Highest absolute is distance
-    return max(abs(x) ,abs(y) ,abs(d))
-
-# Heuristic distance + the swing distance in the next move
-def heuristic_swing(game, token_move, token2):
-    h_dist = heuristic(token_move, token2)
-    if h_dist == 2:
-        if [token2.r, token2.q] in token_move.viable_actions(game, True):
-            h_dist = 1
-
-    return h_dist
 
 
 def test_solve():
@@ -58,7 +39,7 @@ def max_value(state, game, a, b):
 
     # Apply when tokens are attacking
     val, my_move = equilibrium_strategy(state, game, val)
-    if val != None and my_move != None:
+    if my_move != None:
 
         # if my_move[0] == None:
         #     # my_move[1] = token runs away
@@ -74,6 +55,8 @@ def max_value(state, game, a, b):
         #             my_move = [new_state, run_away_token, player_action]
         print("equilibrium")
         return val, my_move[1:3]
+
+
     print("minimax")
     val = -inf
     best_moves = []
