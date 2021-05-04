@@ -124,7 +124,7 @@ def defeat_token_distance(game):
     return token_distances(game, game.me) - token_distances(game, game.opponent)
 
 
-
+# prefers tokens being close together
 def eval_tokens_on_board(game_board):
     value = 0
 
