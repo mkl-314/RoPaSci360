@@ -49,6 +49,7 @@ def solve_game(V, maximiser=True, rowplayer=True):
         V = V.T
     if not maximiser:
         V = -V
+    print(V)
     m, n = V.shape
     # ensure positive
     c = -V.min()
