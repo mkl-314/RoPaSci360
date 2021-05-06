@@ -10,6 +10,7 @@ import copy
 
 E_CUT_OFF_LIMIT = 1
 
+# Returns all actions where a token can defeat or be defeated
 def defeat_actions(state, my_action):
     next_states = []
 
@@ -123,10 +124,16 @@ def equilibrium_eval(state):
 
 def calc_score(new_state, state):
 
-    score = len(new_state.data[state.me]) - len(state.data[state.me])
-    score += len(state.data[state.opponent]) - len(new_state.data[state.opponent]) 
-    score += 1.3 * (new_state.tokens_in_hand[state.me] -state.tokens_in_hand[state.me])
-    score += 1.3 * (state.tokens_in_hand[state.opponent] -new_state.tokens_in_hand[state.opponent])
+    # Eval when comparing prev state
+    # score = len(new_state.data[state.me]) - len(state.data[state.me])
+    # score += len(state.data[state.opponent]) - len(new_state.data[state.opponent]) 
+    # score += 1.3 * (new_state.tokens_in_hand[state.me] -state.tokens_in_hand[state.me])
+    # score += 1.3 * (state.tokens_in_hand[state.opponent] -new_state.tokens_in_hand[state.opponent])
+    
+    # Eval based on current state
+    score = len(new_state.data[state.me]) - len(new_state.data[state.opponent]) 
+    score += 1.3 * (new_state.tokens_in_hand[state.me] - new_state.tokens_in_hand[state.opponent])
+
 
     return score
 
@@ -187,40 +194,40 @@ def choose_move(state, array=np.array([]), all_moves=[]):
         if value == None:
             # solution is trivially zero - bc can only run away
             #TODO find best run away move !!!!
+            # if find_move:
+            #     # Get a move
+            #     move = all_moves[0][0]
+            #     my_token = move[1]
+            #     if my_token.r == None:
+            #         return 0, move
+            #     run_moves = running_away_actions(my_token, state, True, get_action=False)
 
-            # Get a move
-            # move = all_moves[0][0]
-            # my_token = move[1]
-            # if my_token.r == None:
-            #     return 0, move
-            # run_moves = running_away_actions(my_token, state, True, get_action=False)
+            #     new_moves = []
+            #     value = 0
+            #     for run_move in run_moves:
+            #         op_token = copy.deepcopy(my_token)
+            #         op_token.upper_player = not op_token.upper_player
 
-            # new_moves = []
-            # value = 0
-            # for run_move in run_moves:
-            #     op_token = copy.deepcopy(my_token)
-            #     op_token.upper_player = not op_token.upper_player
+            #         my_token.update(run_move[2])
+            #         # mini eval function:
+            #         # Runs far away from token
+            #         # moves in a safe token
+            #         # moves towards a kill token
+            #         if heuristic_swing(state, op_token, my_token) > 1:
+            #             # if runs far away or in another token
+            #             new_moves.append(run_move)
 
-            #     my_token.update(run_move[2])
-            #     # mini eval function:
-            #     # Runs far away from token
-            #     # moves in a safe token
-            #     # moves towards a kill token
-            #     if heuristic_swing(state, op_token, my_token) > 1:
-            #         # if runs far away or in another token
-            #         new_moves.append(run_move)
+            #         elif (not run_move[0].board_dict[tuple(run_move[2])].isupper() 
+            #             and my_token.upper_player) or \
+            #             (not run_move[0].board_dict[tuple(run_move[2])].islower() 
+            #             and not my_token.upper_player):
+            #             new_moves.append(run_move)
 
-            #     elif (not run_move[0].board_dict[tuple(run_move[2])].isupper() 
-            #         and my_token.upper_player) or \
-            #         (not run_move[0].board_dict[tuple(run_move[2])].islower() 
-            #         and not my_token.upper_player):
-            #         new_moves.append(run_move)
+            #     if len(new_moves) > 0:
+            #         move_index = random.choices(range(len(new_moves)))
+            #         my_move = new_moves[move_index[0]]
 
-            # if len(new_moves) > 0:
-            #     move_index = random.choices(range(len(new_moves)))
-            #     my_move = new_moves[move_index[0]]
-
-            #     return 0.1, my_move
+            #         return 0.1, my_move
             move_index = random.choices(range(len(all_moves)))
             my_move = all_moves[move_index[0]][0]
             # print(len(all_moves))
@@ -231,8 +238,8 @@ def choose_move(state, array=np.array([]), all_moves=[]):
             if E_CUT_OFF_LIMIT == 0 or find_move:
 
                 prob_array = [round(elem, 2) for elem in prob_array]
-                # print(array)
-                # print(prob_array)
+                print(array)
+                print(prob_array)
                 # print("v: " + str(v))
 
                 move_index = random.choices(range(len(all_moves)), weights=prob_array)

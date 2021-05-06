@@ -74,8 +74,8 @@ def max_value(state, game, a, b):
         if val >= b:
             return val, move         
 
-    #move = random.choice(best_moves)
-    move = best_moves[0]
+    move = random.choice(best_moves)
+    #move = best_moves[0]
 
     return val, move
 
