@@ -30,14 +30,15 @@ def heuristic_swing(game, token_move, token2):
 def eval(game):
     value = 0
 
-    # value += 10 * tokens_on_board(game)
-    # value += 10 * tokens_in_hand(game)
+    value += 100 * tokens_on_board(game)
+    value += 100 * tokens_in_hand(game)
     #value += token_types(game)
     value += 1 * defeat_token_distance(game)
 
     if game.tokens_in_hand[game.opponent] > 0:
         value += 1 * token_board_progression(game)
 
+    # value += 1 * invisible_token_types(game)
     value += 10 * eval_tokens_on_board(game)
     return value
 
@@ -72,6 +73,31 @@ def token_types(game):
             value -= game.w4
 
     return value
+
+def invisible_token_types(game):
+
+
+    my_symbols = {"r": 0, "p": 0, "s": 0}
+    op_symbols = {"r": 0, "p": 0, "s": 0}
+    value = 0
+    for my_data in game.data[game.me]:
+        my_symbols[my_data[0]] += 1
+
+
+    for opponent_data in game.data[game.opponent]:
+        op_symbols[opponent_data[0]] += 1
+    
+    for token_type in ["r", "p", "s"]:
+        if my_symbols[token_type] == 0 and op_symbols[_DEFEATS[token_type]] > 0:
+            # enemy has token which cannot be killed
+            value -= 1 #game.w3
+        
+        if my_symbols[token_type] > 0 and op_symbols[_DEFEATED_BY[token_type]] == 0:
+            # we have token which can be killed
+            value += 1 #game.w3 must be zero sum
+
+    return value
+
 
 def token_board_progression(game):
     value = 0

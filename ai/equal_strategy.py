@@ -8,6 +8,9 @@ import numpy as np
 from ai.heuristic import *
 import copy
 
+_DEFEATS = {"r": "s", "p": "r", "s": "p"}
+_DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
+
 E_CUT_OFF_LIMIT = 1
 
 # Returns all actions where a token can defeat or be defeated
@@ -131,12 +134,43 @@ def calc_score(new_state, state):
     # score += 1.3 * (state.tokens_in_hand[state.opponent] -new_state.tokens_in_hand[state.opponent])
     
     # Eval based on current state
-    score = len(new_state.data[state.me]) - len(new_state.data[state.opponent]) 
-    score += 1.3 * (new_state.tokens_in_hand[state.me] - new_state.tokens_in_hand[state.opponent])
+    #score = len(new_state.data[state.me]) - len(new_state.data[state.opponent]) 
+    #score += 1.3 * (new_state.tokens_in_hand[state.me] - new_state.tokens_in_hand[state.opponent])
 
+    # score based on who has more kills (who has more tokens on board + throws left)
+    # zero sum
+    score = len(new_state.data[new_state.me]) + ((new_state.tokens_in_hand[new_state.me]) - len(new_state.data[new_state.opponent]) - (new_state.tokens_in_hand[new_state.opponent]))
+    score = 100 * score
+
+    # how many invisible tokens as tiebreaker
+    score = invisible_token_types(new_state)
 
     return score
 
+def invisible_token_types(game):
+
+    my_symbols = {"r": 0, "p": 0, "s": 0}
+    op_symbols = {"r": 0, "p": 0, "s": 0}
+    value = 0
+    for my_data in game.data[game.me]:
+        my_symbols[my_data[0]] += 1
+
+
+    for opponent_data in game.data[game.opponent]:
+        op_symbols[opponent_data[0]] += 1
+    
+    for token_type in ["r", "p", "s"]:
+        if my_symbols[token_type] == 0 and op_symbols[_DEFEATS[token_type]] > 0:
+            # enemy has token which cannot be killed
+            value -= op_symbols[_DEFEATS[token_type]] #game.w3
+        
+        if my_symbols[token_type] > 0 and op_symbols[_DEFEATED_BY[token_type]] == 0:
+            # we have token which can be killed
+            value += my_symbols[token_type] #game.w3 
+        
+        # must be zero sum
+
+    return value
 
 # Recursive Backward Induction Algorithm
 def equilibrium_strategy(state, game, value):
