@@ -8,7 +8,7 @@ import numpy as np
 from ai.heuristic import *
 import copy
 
-E_CUT_OFF_LIMIT = 1
+E_CUT_OFF_LIMIT = 0
 
 # Returns all actions where a token can defeat or be defeated
 def defeat_actions(state, my_action):
@@ -48,6 +48,8 @@ def defeat_actions(state, my_action):
                 if heuristic_swing(state, player, enemy) == 1:
                     #TODO If my token is also on this hex then isnore this state. 
                     # Should I do this?
+                    # running_states = running_away_actions(player, state, my_action)
+                    # next_states.extend(running_states)
                     new_state = state.apply_action(player, [enemy.r, enemy.q], my_action)
                     next_states.append( [new_state, player, [enemy.r, enemy.q]] )
 
@@ -79,13 +81,13 @@ def running_away_actions(player, state, my_action, get_action=True):
             if player.symbol.lower() in state.board_dict[t_hex].lower():
                 new_state = state.apply_action(player, player_action, my_action)
                 next_states.append( [new_state, player, player_action])
-                if get_action:
-                    break
+                # if get_action:
+                #     break
         else:
             new_state = state.apply_action(player, player_action, my_action)
             next_states.append( [new_state, player, player_action])
-            if get_action:
-                break
+            # if get_action:
+            #     break
     
     return next_states
 
@@ -133,10 +135,13 @@ def calc_score(new_state, state):
     # Eval based on current state
     score = len(new_state.data[state.me]) - len(new_state.data[state.opponent]) 
     score += 1.3 * (new_state.tokens_in_hand[state.me] - new_state.tokens_in_hand[state.opponent])
+    score += invincible_us(state)
 
 
     return score
 
+def invincible_us(state):
+    return 0
 
 # Recursive Backward Induction Algorithm
 def equilibrium_strategy(state, game, value):
@@ -175,6 +180,10 @@ def equilibrium_strategy(state, game, value):
             move_index = random.choices(range(len(all_moves)))
             my_move = all_moves[move_index[0]][0]
 
+            print("line 183")
+            #print(prob_array)
+            print(array)
+
             return 0, my_move
 
         return value, None
@@ -192,7 +201,16 @@ def choose_move(state, array=np.array([]), all_moves=[]):
         # print(array)
         # print(prob_array)
         if value == None:
+            #prob_array = [round(elem, 2) for elem in prob_array]
+            print("line 196")
+            #print(prob_array)
+            print(array)
             # solution is trivially zero - bc can only run away
+
+            # or only attack
+            '''
+            if all array > 0
+            '''
             #TODO find best run away move !!!!
             # if find_move:
             #     # Get a move
@@ -228,6 +246,7 @@ def choose_move(state, array=np.array([]), all_moves=[]):
             #         my_move = new_moves[move_index[0]]
 
             #         return 0.1, my_move
+            
             move_index = random.choices(range(len(all_moves)))
             my_move = all_moves[move_index[0]][0]
             # print(len(all_moves))
@@ -244,12 +263,12 @@ def choose_move(state, array=np.array([]), all_moves=[]):
 
                 move_index = random.choices(range(len(all_moves)), weights=prob_array)
                 my_move = all_moves[move_index[0]][0]
-                #my_token_action = my_move[1].do_action(my_move[2])
-                #print(my_token_action)
-                # print(array)
-                # print(prob_array)
+
                 return round(value, 5), my_move
-            
+
+                # print("line 258")
+                # prob_array = [round(elem, 2) for elem in prob_array]
+                # print(prob_array)
             return value, None
     
     return 0, None

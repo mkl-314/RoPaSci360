@@ -23,11 +23,6 @@ def test_solve():
 def minimax_manager(game):
 
     value, move = max_value(game, game, -inf, inf)
-    #game_board = GameBoard("upper")
-    # game_board.update(('THROW', 'r', (0, 0)), ('THROW', 'p', (0, 1)))
-
-    #array, my_moves = create_array(game_board)
-    # print(array)
 
     return move
 
@@ -74,8 +69,8 @@ def max_value(state, game, a, b):
         if val >= b:
             return val, move         
 
-    move = random.choice(best_moves)
-    #move = best_moves[0]
+    #move = random.choice(best_moves)
+    move = best_moves[0]
 
     return val, move
 
