@@ -7,6 +7,8 @@ from classes.GameBoard import GameBoard
 import numpy as np
 from ai.heuristic import *
 import copy
+_DEFEATS = {"r": "s", "p": "r", "s": "p"}
+_DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
 E_CUT_OFF_LIMIT = 0
 
@@ -140,8 +142,45 @@ def calc_score(new_state, state):
 
     return score
 
-def invincible_us(state):
-    return 0
+def is_invincible_state(state):
+
+    my_symbols = {"r": 0, "p": 0, "s": 0}
+    op_symbols = {"r": 0, "p": 0, "s": 0}
+    for my_data in state.data[state.me]:
+        my_symbols[my_data[0]] += 1
+
+    for opponent_data in state.data[state.opponent]:
+        op_symbols[opponent_data[0]] += 1
+    
+    invincible = 0
+    for token_type in ["r", "p", "s"]:
+        if my_symbols[token_type] == 0 and op_symbols[_DEFEATS[token_type]] > 0:
+            # enemy has token which cannot be killed
+            if (len(my_symbols) <= 1 and state.tokens_in_hand[state.me] == 0):
+                invincible = -1
+        
+        if my_symbols[token_type] > 0 and op_symbols[_DEFEATED_BY[token_type]] == 0:
+            # we have token which can be killed
+            if (len(op_symbols) <= 1 and state.tokens_in_hand[state.opponent] == 0):
+                invincible = 1
+            
+    return invincible
+
+def is_win_state(state):
+    my_symbols = {"r": 0, "p": 0, "s": 0}
+    op_symbols = {"r": 0, "p": 0, "s": 0}
+
+    win = 0
+    if (state.tokens_in_hand[state.me] == 0) & (state.data[state.me] == 0):
+        if (state.tokens_in_hand[state.opponent] > 0) or (state.data[state.opponent] > 0):
+            # we have nothing opponent has something
+            win = -1
+        # else draw
+    else (state.tokens_in_hand[state.opponent] == 0) & (state.data[state.opponent] == 0):
+        # we have something but opponent has nothing
+        win = 1
+
+    return win
 
 # Recursive Backward Induction Algorithm
 def equilibrium_strategy(state, game, value):
