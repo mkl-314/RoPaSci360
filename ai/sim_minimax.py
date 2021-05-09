@@ -6,8 +6,9 @@ from classes.GameBoard import GameBoard
 import numpy as np
 from ai.equal_strategy import equilibrium_strategy
 from ai.helper_functions import *
+from ai.eval import minimax_eval
 
-CUT_OFF_LIMIT = 1
+CUT_OFF_LIMIT = 2
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
@@ -26,7 +27,7 @@ def minimax_manager(game):
 
 def max_value(state, game, a, b):
     if state.turn - game.turn >= CUT_OFF_LIMIT:
-        return state.eval(), None
+        return minimax_eval(state), None
     
     val = -inf 
 
@@ -34,6 +35,7 @@ def max_value(state, game, a, b):
     val, my_move = equilibrium_strategy(state, game, val)
     if my_move != None:
         print("equilibrium")
+        print(val)
         return val, my_move[1:3]
 
 
@@ -64,10 +66,9 @@ return value, action
 
 '''
 def min_value(state, game, a, b):
-    #state.turn -= 1
 
     if state.turn - game.turn >= CUT_OFF_LIMIT:
-        return state.eval(), None
+        return minimax_eval(state), None
     
     val = inf
     best_moves = [] 

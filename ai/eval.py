@@ -5,21 +5,32 @@ from ai.helper_functions import *
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
-def eval(game):
+def minimax_eval(game):
     value = 0
 
-    # value += 1 * tokens_on_board(game)
-    # value += 1.3 * tokens_in_hand(game)
+    value += 1 * tokens_on_board(game)
+    value += 1.1 * tokens_in_hand(game)
     #value += token_types(game)
     value += 0.1 * defeat_token_distance(game)
-
-    # Prioritises tokens being closer to initial row
     value += 0.1 * token_board_progression(game)
 
-    value += 0.1 * eval_tokens_on_board(game)
-    value += 1 * min_attacking_distance(game)
+    value += 0.01 * num_viable_actions(game)
+    value += 0.8 * min_attacking_distance(game)
     return value
 
+
+def equilibrium_eval(new_state, state):
+    
+    # Eval based on next state
+    score = tokens_on_board(new_state)
+    score += 1.3 * tokens_in_hand(new_state)
+    score += 0.5 * min_attacking_distance(new_state)
+    # score += 0.01 * token_board_progression(new_state)
+    score += 0.1 * num_viable_actions(new_state)
+    score += 10 * invincible_state(new_state)
+    score += 100 * win_state(new_state)
+
+    return score
 
 
 def tokens_on_board(game):
@@ -52,9 +63,10 @@ def token_types(game):
 
     return value
 
+# Prioritises tokens being closer to initial row
 def token_board_progression(game):
 
-    if game.tokens_in_hand[game.opponent] == 0:
+    if game.tokens_in_hand[game.opponent] <= 1:
         return 0
 
     value = 0
@@ -64,11 +76,27 @@ def token_board_progression(game):
     else:
         my_initial_row = -4
 
+    no_attacking_token = True
     for my_data in game.data[game.me]: 
-        value += 8 - abs(my_initial_row - my_data[1])
+        distance = abs(my_initial_row - my_data[1])
+        if distance < 5:
+            value += 8 - distance
+        elif no_attacking_token and distance >= 5:
+            no_attacking_token = False
+            value += 8
+        elif not no_attacking_token and distance >= 5:
+            value += 1
 
+    no_attacking_token = True
     for op_data in game.data[game.opponent]: 
-        value -= 8 - abs(-1 * my_initial_row - op_data[1])
+        distance = abs(my_initial_row - my_data[1])
+        if distance < 5:
+            value -= 8 - distance
+        elif no_attacking_token and distance >= 5:
+            no_attacking_token = False
+            value += 8
+        elif not no_attacking_token and distance >= 5:
+            value += 1
 
     return value / (len(game.data[game.me]) + len(game.data[game.opponent]))
 
@@ -108,7 +136,7 @@ def defeat_token_distance(game):
 
 
 # prefers tokens being close together
-def eval_tokens_on_board(game_board):
+def num_viable_actions(game_board):
     value = 0
 
     my_symbols = {"r": 0, "p": 0, "s": 0}
@@ -146,45 +174,6 @@ def eval_tokens_on_board(game_board):
             # if my_symbols[_DEFEATS[symbol]] > 0:
             #     value -= 0.1
 
-
-    # # game_board.split_token_symbols()
-    # # h_defeat_dist = []
-    # # h_defeated_by_dist = []
-
-
-    # Evaluate heuristic distance and actual distance of opponents 
-    # for my_data in game_board.data[game_board.me]:
-    #     my_token = Token(my_data, game_board.me)
-    #     op_defeat_data = game_board.op_tokens[my_token.defeats]
-    #     op_defeated_by_data = game_board.op_tokens[my_token.defeated_by]
-
-    #     for op_data in op_defeat_data:
-    #         op_token = Token(op_data, game_board.opponent)
-
-    #         h_dist = heuristic(my_token, op_token)
-    #         h_defeat_dist.append(h_dist)
-
-    #     for op_data in op_defeated_by_data:
-    #         op_token = Token(op_data, game_board.opponent)
-
-    #         h_dist = heuristic(my_token, op_token)
-    #         h_defeated_by_dist.append(h_dist)
-
-
-        
-    # if h_defeat_dist != []:
-    #     min_dist = min(h_defeat_dist)
-    #     value += 0.01*(8-min_dist)      
-        
-    
-    # if h_defeated_by_dist != []:
-    #     min_dist = min(h_defeated_by_dist)
-    #     value -= 0.01*(8-min_dist)    
-    # Evaluate protection by my tokens
-    # for my_data in game_board.data[game_board.me]:
-    #     my_token = Token(my_data, game_board.me)
-
-        # Protect token that can be taken
         
     return value
 
@@ -234,3 +223,51 @@ def min_attacking_distance(game_board):
             value -= 0.1 * (8-min_dist)
 
     return value
+
+
+def invincible_state(state):
+
+    if state.tokens_in_hand[state.opponent] == 0 or state.tokens_in_hand[state.me] == 0:
+        my_symbols = {"r": 0, "p": 0, "s": 0}
+        op_symbols = {"r": 0, "p": 0, "s": 0}
+        for my_data in state.data[state.me]:
+            my_symbols[my_data[0]] += 1
+
+        for opponent_data in state.data[state.opponent]:
+            op_symbols[opponent_data[0]] += 1
+        
+        invincible = 0
+        for token_type in ["r", "p", "s"]:
+            if my_symbols[token_type] == 0 and op_symbols[_DEFEATS[token_type]] > 0:
+                # enemy has token which cannot be killed
+                if (state.tokens_in_hand[state.me] == 0):
+                    invincible = -1
+            
+            if my_symbols[token_type] > 0 and op_symbols[_DEFEATED_BY[token_type]] == 0:
+                # we have token which cannot be killed
+                if (state.tokens_in_hand[state.opponent] == 0):
+                    invincible = 1
+                
+        return invincible
+    return 0
+
+    
+def win_state(state):
+    if (state.tokens_in_hand[state.me] + len(state.data[state.me])) <= 1:
+
+        win = 0
+        if (state.tokens_in_hand[state.me] == 0) & (state.data[state.me] == 0):
+            if (state.tokens_in_hand[state.opponent] > 0) or (state.data[state.opponent] > 0):
+                # we have nothing opponent has something
+                win = -1
+            # else draw
+        elif (state.tokens_in_hand[state.opponent] == 0) & (state.data[state.opponent] == 0):
+            # we have something but opponent has nothing
+            win = 1
+        elif invincible_state(state) == -1 and state.tokens_in_hand[state.me] + len(state.data[state.me]) == 1:
+            win = -1
+        elif invincible_state(state) == 1 and state.tokens_in_hand[state.opponent] + len(state.data[state.opponent]) == 1:
+            win = 1
+        return win
+    
+    return 0

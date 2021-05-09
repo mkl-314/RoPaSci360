@@ -2,7 +2,6 @@
 import re
 import copy
 #from ai.path_searching import eval
-from ai.eval import eval
 import random
 
 class GameBoard(object):
@@ -146,8 +145,3 @@ class GameBoard(object):
                 s_tokens.append(token)  
         
         return r_tokens, p_tokens, s_tokens
-
-
-    # Evaluate the value of the state
-    def eval(self):
-        return eval(self)

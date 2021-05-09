@@ -40,6 +40,8 @@ class Player:
             return ('THROW', symbol, (4 * flip, flip * (1 - self.turn)) )
         elif self.turn == 6:
             return ('THROW', "s", (0, 0) )
+        elif self.turn == 7:
+            return ('THROW', "p", (0, 0) )
         
         if len(self.game_board.data[self.player]) == 6 and self.single_destroy:
             new_game_board = copy.deepcopy(self.game_board)
