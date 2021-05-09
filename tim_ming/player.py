@@ -1,7 +1,7 @@
 
 from classes.GameBoard import GameBoard
-from moves.throw_move import *
 from ai.sim_minimax import *
+from MachineLearning import ml
 
 
 
@@ -25,9 +25,10 @@ class Player:
         of the game, select an action to play this turn.
         """
         self.turn += 1
-        move = minimax_manager(self.game_board)
+        value, move = minimax_manager(self.game_board)
 
-        return move[0].do_action(move[1])
+        ml(self.game_board, move[0])
+        return move[1].do_action(move[2])
 
     
     def update(self, opponent_action, player_action):
