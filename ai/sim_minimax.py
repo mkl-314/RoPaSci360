@@ -1,15 +1,13 @@
 from classes.Token import Token
-from moves.throw_move import *
 from math import inf
 import random
 from gametheory import solve_game
 from classes.GameBoard import GameBoard
 import numpy as np
-from ai.equal_strategy import *
-from ai.heuristic import *
+from ai.equal_strategy import equilibrium_strategy
+from ai.helper_functions import *
 
 CUT_OFF_LIMIT = 1
-E_CUT_OFF_LIMIT = 1
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
@@ -35,19 +33,6 @@ def max_value(state, game, a, b):
     # Apply when tokens are attacking
     val, my_move = equilibrium_strategy(state, game, val)
     if my_move != None:
-
-        # if my_move[0] == None:
-        #     # my_move[1] = token runs away
-        #     run_away_token = my_move[1]
-            
-        #     val = -inf
-
-        #     player_actions = run_away_token.viable_actions(state, True)
-        #     for player_action in player_actions:
-        #         new_state = state.apply_action(run_away_token, player_action, True)
-
-        #         if new_state.eval() > val:
-        #             my_move = [new_state, run_away_token, player_action]
         print("equilibrium")
         return val, my_move[1:3]
 
@@ -69,8 +54,8 @@ def max_value(state, game, a, b):
         if val >= b:
             return val, move         
 
-    #move = random.choice(best_moves)
-    move = best_moves[0]
+    move = random.choice(best_moves)
+    #move = best_moves[0]
 
     return val, move
 
@@ -100,42 +85,42 @@ def min_value(state, game, a, b):
     move = random.choice(best_moves)
     return val, move
 
-'''
-    Find all viable moves
-    try sorting to maximise pruning
-    return state (game_board)
-'''
-def actions(state, my_action):
-    next_states = []
+# '''
+#     Find all viable moves
+#     try sorting to maximise pruning
+#     return state (game_board)
+# '''
+# def actions(state, my_action):
+#     next_states = []
 
-    if my_action:
-        tokens = state.data[state.me]
-        token_type = state.me # lower
-    else: 
-        tokens = state.data[state.opponent]
-        token_type = state.opponent
+#     if my_action:
+#         tokens = state.data[state.me]
+#         token_type = state.me # lower
+#     else: 
+#         tokens = state.data[state.opponent]
+#         token_type = state.opponent
 
-    # Slide and Swing moves
-    for token in tokens:
-        player = Token(token, token_type == "upper")
-        player_actions = player.viable_actions(state, True)
+#     # Slide and Swing moves
+#     for token in tokens:
+#         player = Token(token, token_type == "upper")
+#         player_actions = player.viable_actions(state, True)
 
-        for player_action in player_actions:
-                new_state = state.apply_action(player, player_action, my_action)
-                next_states.append( [new_state, player, player_action])
+#         for player_action in player_actions:
+#                 new_state = state.apply_action(player, player_action, my_action)
+#                 next_states.append( [new_state, player, player_action])
 
-    # Throw moves
-    if state.tokens_in_hand[token_type] > 0:
-        for hex in throwable_hexes(state, token_type):
-            for token in ["r", "p", "s"]:
-                player = Token([token, None, None], token_type == "upper")
+#     # Throw moves
+#     if state.tokens_in_hand[token_type] > 0:
+#         for hex in throwable_hexes(state, token_type):
+#             for token in ["r", "p", "s"]:
+#                 player = Token([token, None, None], token_type == "upper")
 
-                new_state = state.apply_action(player, hex, my_action)
-                next_states.append( [new_state, player, hex])
+#                 new_state = state.apply_action(player, hex, my_action)
+#                 next_states.append( [new_state, player, hex])
 
-    # sort for perfect ordering
-    # next_states.sort(key=lambda x: x[0].eval(), reverse= my_action)
+#     # sort for perfect ordering
+#     # next_states.sort(key=lambda x: x[0].eval(), reverse= my_action)
 
-    return next_states
+#     return next_states
 
 

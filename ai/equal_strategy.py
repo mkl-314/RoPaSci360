@@ -1,14 +1,57 @@
 from classes.Token import Token
-from moves.throw_move import throwable_hexes, throwable_row_range
+# from moves.throw_move import throwable_hexes, throwable_row_range
 from math import inf
 import random
 from gametheory import solve_game
 from classes.GameBoard import GameBoard
 import numpy as np
-from ai.heuristic import *
+from ai.helper_functions import *
+from ai.eval import min_attacking_distance, token_board_progression, eval_tokens_on_board
 import copy
 
 E_CUT_OFF_LIMIT = 0
+
+'''
+    Find all viable moves
+    try sorting to maximise pruning
+    return state (game_board)
+'''
+def actions(state, my_action):
+    next_states = []
+
+    if my_action:
+        tokens = state.data[state.me]
+        token_type = state.me # lower
+    else: 
+        tokens = state.data[state.opponent]
+        token_type = state.opponent
+
+    # Slide and Swing moves
+    for token in tokens:
+        player = Token(token, token_type == "upper")
+        player_actions = player.viable_actions(state, True)
+
+        for player_action in player_actions:
+                new_state = state.apply_action(player, player_action, my_action)
+                next_states.append( [new_state, player, player_action])
+
+    # Throw moves - reduced
+    if state.tokens_in_hand[token_type] > 0:
+        throw_hexes = throwable_hexes(state, token_type)
+        for hex, tokens in state.board_dict.items():
+            if hex in throw_hexes:
+                if (token_type == "upper" and tokens.islower()) or \
+                    (token_type == "lower" and tokens.isupper()):
+
+                    enemy_token = Token([tokens[0].lower(), hex[0], hex[1]], token_type != "upper" )
+                    player = Token([enemy_token.defeated_by , None, None], token_type == "upper")
+                    new_state = state.apply_action(player, hex, my_action)
+                    next_states.append( [new_state, player, hex])  
+
+    # sort for perfect ordering
+    # next_states.sort(key=lambda x: x[0].eval(), reverse= my_action)
+
+    return next_states
 
 # Returns all actions where a token can defeat or be defeated
 def defeat_actions(state, my_action):
@@ -46,13 +89,17 @@ def defeat_actions(state, my_action):
             # Player defeats enemy
             if player.defeats == enemy.symbol: 
                 if heuristic_swing(state, player, enemy) == 1:
-                    #TODO If my token is also on this hex then isnore this state. 
-                    # Should I do this?
+
                     # running_states = running_away_actions(player, state, my_action)
                     # next_states.extend(running_states)
-                    new_state = state.apply_action(player, [enemy.r, enemy.q], my_action)
-                    next_states.append( [new_state, player, [enemy.r, enemy.q]] )
-
+                    # new_state = state.apply_action(player, [enemy.r, enemy.q], my_action)
+                    # next_states.append( [new_state, player, [enemy.r, enemy.q]] )
+                    enemy_actions = enemy.viable_actions(state, True)
+                    player_actions = player.viable_actions(state, True)
+                    viable_hexes_in_common = [hex for hex in enemy_actions if hex in player_actions]
+                    for hex in viable_hexes_in_common:
+                        new_state = state.apply_action(player, hex, my_action)
+                        next_states.append( [new_state, player, hex] )
             # player gets defeated by opponenet
             elif player.defeated_by == enemy.symbol:
                 if heuristic_swing(state, enemy, player) == 1:
@@ -100,8 +147,11 @@ def equilibrium_eval(state):
     my_defeat_actions = defeat_actions(state, True)
     op_defeat_actions = defeat_actions(state, False)
 
-    # reduce my actions by figuring out running away moves later 
-    # print("simplified: " + str(len(my_defeat_actions)))
+    # This takes too long
+    # if len(my_defeat_actions) == 1 or len(op_defeat_actions) == 1:
+    #     my_defeat_actions = actions(state, True)
+    #     op_defeat_actions = actions(state, False)
+
 
     for my_action in my_defeat_actions:
         score_row = [] 
@@ -135,13 +185,12 @@ def calc_score(new_state, state):
     # Eval based on current state
     score = len(new_state.data[state.me]) - len(new_state.data[state.opponent]) 
     score += 1.3 * (new_state.tokens_in_hand[state.me] - new_state.tokens_in_hand[state.opponent])
-    score += invincible_us(state)
-
+    score += 0.2 * min_attacking_distance(new_state)
+    # score += 0.01 * token_board_progression(new_state)
+    score += 0.1 * eval_tokens_on_board(new_state)
 
     return score
 
-def invincible_us(state):
-    return 0
 
 # Recursive Backward Induction Algorithm
 def equilibrium_strategy(state, game, value):
@@ -180,10 +229,6 @@ def equilibrium_strategy(state, game, value):
             move_index = random.choices(range(len(all_moves)))
             my_move = all_moves[move_index[0]][0]
 
-            print("line 183")
-            #print(prob_array)
-            print(array)
-
             return 0, my_move
 
         return value, None
@@ -204,15 +249,13 @@ def choose_move(state, array=np.array([]), all_moves=[]):
             #prob_array = [round(elem, 2) for elem in prob_array]
             print("line 196")
             #print(prob_array)
-            print(array)
+            #print(array)
             # solution is trivially zero - bc can only run away
-
             # or only attack
-            '''
-            if all array > 0
-            '''
             #TODO find best run away move !!!!
-            # if find_move:
+            # if E_CUT_OFF_LIMIT == 0 or find_move:
+            #     if state.turn == 6:
+            #         t = 1
             #     # Get a move
             #     move = all_moves[0][0]
             #     my_token = move[1]
@@ -222,19 +265,24 @@ def choose_move(state, array=np.array([]), all_moves=[]):
 
             #     new_moves = []
             #     value = 0
-            #     for run_move in run_moves:
-            #         op_token = copy.deepcopy(my_token)
-            #         op_token.upper_player = not op_token.upper_player
 
-            #         my_token.update(run_move[2])
+            #     temp_op_token = copy.deepcopy(my_token)
+            #     temp_op_token.upper_player = not op_token.upper_player
+            #     temp_my_token = copy.deepcopy(my_token)
+            #     for run_move in run_moves:
+
+
+            #         temp_my_token.update(run_move[2])
             #         # mini eval function:
             #         # Runs far away from token
             #         # moves in a safe token
             #         # moves towards a kill token
-            #         if heuristic_swing(state, op_token, my_token) > 1:
+            #         if heuristic_swing(state, op_token, temp_my_token) > 1:
             #             # if runs far away or in another token
+
             #             new_moves.append(run_move)
 
+            #         elif [my_token.r, my_token.q] in 
             #         elif (not run_move[0].board_dict[tuple(run_move[2])].isupper() 
             #             and my_token.upper_player) or \
             #             (not run_move[0].board_dict[tuple(run_move[2])].islower() 
@@ -246,7 +294,7 @@ def choose_move(state, array=np.array([]), all_moves=[]):
             #         my_move = new_moves[move_index[0]]
 
             #         return 0.1, my_move
-            
+
             move_index = random.choices(range(len(all_moves)))
             my_move = all_moves[move_index[0]][0]
             # print(len(all_moves))
@@ -263,7 +311,7 @@ def choose_move(state, array=np.array([]), all_moves=[]):
 
                 move_index = random.choices(range(len(all_moves)), weights=prob_array)
                 my_move = all_moves[move_index[0]][0]
-
+                # print("Prob: " + str(prob_array[move_index[0]]))
                 return round(value, 5), my_move
 
                 # print("line 258")

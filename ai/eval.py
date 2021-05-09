@@ -1,44 +1,23 @@
 import math 
 from classes.Token import Token
 from moves.throw_move import *
-from ai.heuristic import *
+from ai.helper_functions import *
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
-
-'''
-Heursitic algorithm to find hex distance between two tokens
-'''
-def heuristic(token1, token2):
-    # Difference in row (negative)
-    x = -token1.r + token2.r
-    # Difference in column
-    y = token1.q - token2.q
-    # Difference of differences
-    d = x - y
-    # Highest absolute is distance
-    return max(abs(x) ,abs(y) ,abs(d))
-
-# Heuristic distance + the swing distance in the next move
-def heuristic_swing(game, token_move, token2):
-    h_dist = heuristic(token_move, token2)
-    if h_dist == 2:
-        if [token2.r, token2.q] in token_move.viable_actions(game, True):
-            h_dist = 1
-
-    return h_dist
 
 def eval(game):
     value = 0
 
-    # value += 10 * tokens_on_board(game)
-    # value += 10 * tokens_in_hand(game)
+    # value += 1 * tokens_on_board(game)
+    # value += 1.3 * tokens_in_hand(game)
     #value += token_types(game)
-    value += 1 * defeat_token_distance(game)
+    value += 0.1 * defeat_token_distance(game)
 
-    if game.tokens_in_hand[game.opponent] > 0:
-        value += 1 * token_board_progression(game)
+    # Prioritises tokens being closer to initial row
+    value += 0.1 * token_board_progression(game)
 
-    value += 10 * eval_tokens_on_board(game)
+    value += 0.1 * eval_tokens_on_board(game)
+    value += 1 * min_attacking_distance(game)
     return value
 
 
@@ -74,6 +53,10 @@ def token_types(game):
     return value
 
 def token_board_progression(game):
+
+    if game.tokens_in_hand[game.opponent] == 0:
+        return 0
+
     value = 0
 
     if game.me == "upper":
@@ -132,11 +115,11 @@ def eval_tokens_on_board(game_board):
     op_symbols = {"r": 0, "p": 0, "s": 0}
 
     my_sorted_tokens = sorted(game_board.data[game_board.me])
-    # Evaluate placement of tokens
+    # Evaluate placement of tokens - priorities tokens to have greatest # of moves possible
     for i in range(len(my_sorted_tokens)):
         my_data = my_sorted_tokens[i]
         my_token = Token(my_data, game_board.me == "upper")
-        value += 0.001 * len(my_token.viable_actions(game_board, True))
+        value += 0.01 * len(my_token.viable_actions(game_board, True))
 
         # Avoid putting the same token on each other
         if i > 0 and my_sorted_tokens[i-1] == my_data:
@@ -158,16 +141,62 @@ def eval_tokens_on_board(game_board):
     for (symbol, num) in op_symbols.items():
         if num > 0:
             if my_symbols[_DEFEATED_BY[symbol]] > 0:
-                value += 0.1
+                value += 1
             
             # if my_symbols[_DEFEATS[symbol]] > 0:
             #     value -= 0.1
 
 
+    # # game_board.split_token_symbols()
+    # # h_defeat_dist = []
+    # # h_defeated_by_dist = []
+
+
+    # Evaluate heuristic distance and actual distance of opponents 
+    # for my_data in game_board.data[game_board.me]:
+    #     my_token = Token(my_data, game_board.me)
+    #     op_defeat_data = game_board.op_tokens[my_token.defeats]
+    #     op_defeated_by_data = game_board.op_tokens[my_token.defeated_by]
+
+    #     for op_data in op_defeat_data:
+    #         op_token = Token(op_data, game_board.opponent)
+
+    #         h_dist = heuristic(my_token, op_token)
+    #         h_defeat_dist.append(h_dist)
+
+    #     for op_data in op_defeated_by_data:
+    #         op_token = Token(op_data, game_board.opponent)
+
+    #         h_dist = heuristic(my_token, op_token)
+    #         h_defeated_by_dist.append(h_dist)
+
+
+        
+    # if h_defeat_dist != []:
+    #     min_dist = min(h_defeat_dist)
+    #     value += 0.01*(8-min_dist)      
+        
+    
+    # if h_defeated_by_dist != []:
+    #     min_dist = min(h_defeated_by_dist)
+    #     value -= 0.01*(8-min_dist)    
+    # Evaluate protection by my tokens
+    # for my_data in game_board.data[game_board.me]:
+    #     my_token = Token(my_data, game_board.me)
+
+        # Protect token that can be taken
+        
+    return value
+
+
+'''
+Equilibrium strategy eval
+'''
+def min_attacking_distance(game_board):
+    value = 0
     game_board.split_token_symbols()
     h_defeat_dist = []
     h_defeated_by_dist = []
-
 
     # Evaluate heuristic distance and actual distance of opponents 
     for my_data in game_board.data[game_board.me]:
@@ -178,29 +207,30 @@ def eval_tokens_on_board(game_board):
         for op_data in op_defeat_data:
             op_token = Token(op_data, game_board.opponent)
 
-            h_dist = heuristic(my_token, op_token)
+            h_dist = heuristic_swing(game_board, my_token, op_token)
             h_defeat_dist.append(h_dist)
 
         for op_data in op_defeated_by_data:
             op_token = Token(op_data, game_board.opponent)
 
-            h_dist = heuristic(my_token, op_token)
+            h_dist = heuristic_swing(game_board, op_token, my_token)
             h_defeated_by_dist.append(h_dist)
 
 
         
     if h_defeat_dist != []:
         min_dist = min(h_defeat_dist)
-        value += 0.01*(8-min_dist)      
+        if min_dist == 1:
+            value += 1
+        else:
+            value += 0.1 * (8-min_dist)
         
     
     if h_defeated_by_dist != []:
         min_dist = min(h_defeated_by_dist)
-        value -= 0.01*(8-min_dist)    
-    # Evaluate protection by my tokens
-    # for my_data in game_board.data[game_board.me]:
-    #     my_token = Token(my_data, game_board.me)
+        if min_dist == 1:
+            value -= 1
+        else:
+            value -= 0.1 * (8-min_dist)
 
-        # Protect token that can be taken
-        
     return value

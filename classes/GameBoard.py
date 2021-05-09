@@ -15,11 +15,6 @@ class GameBoard(object):
         self.board_dict = {}
         self.data = {"upper": [], "lower": []} 
         self.tokens_in_hand = {"upper": 9, "lower": 9} 
-
-        # self.w1 = random.uniform(0,1)
-        # self.w2 = random.uniform(0,1)
-        # self.w3 = random.uniform(0,1)
-        # self.w4 = random.uniform(0,1)
     
     # formats gameboard data by hex
     def update_board(self, data):
@@ -153,11 +148,6 @@ class GameBoard(object):
         return r_tokens, p_tokens, s_tokens
 
 
-    # Evaluate the value that the state has
-    # count my tokens to their tokens + positioning + location
-    # Heuristics? - using would mean halving distance as swing moves may occur
+    # Evaluate the value of the state
     def eval(self):
         return eval(self)
-
-    def can_defeat(self):
-        return False
