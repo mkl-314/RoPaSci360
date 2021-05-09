@@ -13,12 +13,6 @@ _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
 
-def test_solve():
-    game_board = GameBoard("upper")
-    game_board.update(('THROW', 'r', (4, 0)), ('THROW', 'p', (-4, 2)))
-    game_board.update(('THROW', 'r', (0, 0)), ('THROW', 'p', (0, 1)))
-
-
 def minimax_manager(game):
 
     value, move = max_value(game, game, -inf, inf)
