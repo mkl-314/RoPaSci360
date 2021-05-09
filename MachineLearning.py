@@ -3,10 +3,11 @@ from ai.eval import *
 
 def ml(state, future_state):
 
-    with open('ml.csv', 'w') as csvfile:
+    with open('ml.csv', 'a', newline='') as csvfile:
         filewriter = csv.writer(csvfile, delimiter=',')
         
-        # current score, tokens_on_board, tokens_in_hand, my_invincible, op invincible, future score
+        # current_score, tokens_on_board, tokens_in_hand, future_score
+        # my_invincible, op invincible
 
         current_score = tokens_on_board(state) + tokens_in_hand(state)
         on_board = tokens_on_board(state) 
