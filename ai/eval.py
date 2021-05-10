@@ -96,8 +96,10 @@ def token_board_progression(game):
             value += 8
         elif not no_attacking_token and distance >= 5:
             value += 1
-
-    return value / (len(game.data[game.me]) + len(game.data[game.opponent]))
+    if (len(game.data[game.me]) + len(game.data[game.opponent]) > 0):
+        return value / (len(game.data[game.me]) + len(game.data[game.opponent]))
+    else:
+        return 0 
 
 def defeat_token_distance(game):
 

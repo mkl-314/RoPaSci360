@@ -1,3 +1,4 @@
 from referee.main import main
 
-main()
+for i in range(10000):
+    main()
