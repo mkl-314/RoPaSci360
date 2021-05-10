@@ -81,16 +81,13 @@ def running_away_actions(player, state, my_action, get_action=True):
     for player_action in player_actions:
         t_hex = (player_action[0], player_action[1]) 
         if t_hex in state.board_dict:
-            #if player.symbol.lower() in state.board_dict[t_hex].lower():
-            new_state = state.apply_action(player, player_action, my_action)
-            next_states.append( [new_state, player, player_action])
-                # if get_action:
-                #     break
+            if not player.defeated_by in state.board_dict[t_hex].lower():
+                new_state = state.apply_action(player, player_action, my_action)
+                next_states.append( [new_state, player, player_action])
+
         else:
             new_state = state.apply_action(player, player_action, my_action)
             next_states.append( [new_state, player, player_action])
-            # if get_action:
-            #     break
     
     return next_states
 

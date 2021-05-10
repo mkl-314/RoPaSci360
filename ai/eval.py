@@ -64,6 +64,7 @@ def token_board_progression(game):
 
     return value / (len(game.data[game.me]) + len(game.data[game.opponent]))
 
+
 def defeat_token_distance(game):
 
     def token_distances(game, player):
