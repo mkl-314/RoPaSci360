@@ -14,7 +14,16 @@ class GameBoard(object):
         self.board_dict = {}
         self.data = {"upper": [], "lower": []} 
         self.tokens_in_hand = {"upper": 9, "lower": 9} 
+        self.ignore_token = None
     
+    def __eq__(self, gameboard):
+        return self.tokens_in_hand == gameboard.tokens_in_hand and self.data == gameboard.data
+
+    def possible_same_state(self, gameboard):
+        return self.tokens_in_hand == gameboard.tokens_in_hand and \
+            len(self.data["upper"]) == len(gameboard.data["upper"]) and \
+                len(self.data["lower"]) == len(gameboard.data["lower"])
+
     # formats gameboard data by hex
     def update_board(self, data):
         board_dict = {}

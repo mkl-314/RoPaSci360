@@ -1,1 +1,0 @@
-from defence_player.player import Player

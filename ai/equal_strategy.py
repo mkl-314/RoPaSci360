@@ -1,5 +1,4 @@
 from classes.Token import Token
-# from moves.throw_move import throwable_hexes, throwable_row_range
 from math import inf
 import random
 from gametheory import solve_game
@@ -11,48 +10,6 @@ import copy
 
 E_CUT_OFF_LIMIT = 0
 
-'''
-    Find all viable moves
-    try sorting to maximise pruning
-    return state (game_board)
-'''
-def actions(state, my_action):
-    next_states = []
-
-    if my_action:
-        tokens = state.data[state.me]
-        token_type = state.me # lower
-    else: 
-        tokens = state.data[state.opponent]
-        token_type = state.opponent
-
-    # Slide and Swing moves
-    for token in tokens:
-        player = Token(token, token_type == "upper")
-        player_actions = player.viable_actions(state, True)
-
-        for player_action in player_actions:
-                new_state = state.apply_action(player, player_action, my_action)
-                next_states.append( [new_state, player, player_action])
-
-    # Throw moves - reduced
-    if state.tokens_in_hand[token_type] > 0:
-        throw_hexes = throwable_hexes(state, token_type)
-        for hex, tokens in state.board_dict.items():
-            if hex in throw_hexes:
-                if (token_type == "upper" and tokens.islower()) or \
-                    (token_type == "lower" and tokens.isupper()):
-
-                    enemy_token = Token([tokens[0].lower(), hex[0], hex[1]], token_type != "upper" )
-                    player = Token([enemy_token.defeated_by , None, None], token_type == "upper")
-                    new_state = state.apply_action(player, hex, my_action)
-                    next_states.append( [new_state, player, hex])  
-
-    # sort for perfect ordering
-    # next_states.sort(key=lambda x: x[0].eval(), reverse= my_action)
-
-    return next_states
-
 # Returns all actions where a token can defeat or be defeated
 def defeat_actions(state, my_action):
     next_states = []
@@ -63,8 +20,7 @@ def defeat_actions(state, my_action):
     else: 
         token_type = state.opponent
         enemy_token_type = state.me
-
-
+    
     # Throw moves
     if state.tokens_in_hand[token_type] > 0:
         throw_hexes = throwable_hexes(state, token_type)
@@ -78,12 +34,14 @@ def defeat_actions(state, my_action):
                     new_state = state.apply_action(player, hex, my_action)
                     next_states.append( [new_state, player, hex])
 
-
     # Slide and Swing moves
     for player_data in state.data[token_type]:
+        if player_data == state.ignore_token:
+            continue
+
         player = Token(player_data, token_type == "upper")
 
-        new_state = 0
+        new_state = GameBoard("upper")
         for enemy_data in state.data[enemy_token_type]:
             enemy = Token(enemy_data, enemy_token_type == "upper")
             # Player defeats enemy
@@ -107,7 +65,7 @@ def defeat_actions(state, my_action):
                     next_states.extend(running_states)
         
         # Check if token can be thrown onto
-        if new_state == 0:
+        if new_state == GameBoard("upper"):
             if state.tokens_in_hand[enemy_token_type] > 0:
                 if player.r in throwable_row_range(state, enemy_token_type):
                     running_states = running_away_actions(player, state, my_action)
@@ -147,23 +105,20 @@ def payoff_matrix(state):
     my_defeat_actions = defeat_actions(state, True)
     op_defeat_actions = defeat_actions(state, False)
 
-    # This takes too long
-    # if len(my_defeat_actions) == 1 or len(op_defeat_actions) == 1:
-    #     my_defeat_actions = actions(state, True)
-    #     op_defeat_actions = actions(state, False)
 
-
+    # TODO score if we don't move
     for my_action in my_defeat_actions:
         score_row = [] 
         row_action = []
+
+        my_token_action = my_action[1].do_action(my_action[2])
+
         for op_action in op_defeat_actions:
 
-            my_token_action = my_action[1].do_action(my_action[2])
             op_token_action = op_action[1].do_action(op_action[2])
-
             new_state = state.update_copy(my_token_action, op_token_action)
 
-            score = equilibrium_eval(new_state, state)
+            score = equilibrium_eval(new_state)
 
             score_row.append(score) # add row to matrix
             row_action.append([new_state] + my_action[1:3])
@@ -179,11 +134,9 @@ def payoff_matrix(state):
 def equilibrium_strategy(state, game, value):
 
     if state.turn - game.turn >= E_CUT_OFF_LIMIT:
-        value, move = choose_move(state)
-        return value, move
+        return choose_move(state)
     
     else:
-
         array, all_moves = payoff_matrix(state)
 
         if all_moves == [] or array.size == 0:
@@ -226,14 +179,11 @@ def choose_move(state, array=np.array([]), all_moves=[]):
 
     if array.size > 0:
         prob_array, value = solve_game(array)
-        # print(array)
-        # print(prob_array)
-        if value == None:
-            print("value = None")
 
+        if value == None:
             move_index = random.choices(range(len(all_moves)))
             my_move = all_moves[move_index[0]][0]
-            # print(len(all_moves))
+
             return 0, my_move
 
         else:
@@ -241,9 +191,8 @@ def choose_move(state, array=np.array([]), all_moves=[]):
             if E_CUT_OFF_LIMIT == 0 or find_move:
 
                 prob_array = [round(elem, 2) for elem in prob_array]
-                print(array)
-                print(prob_array)
-                
+                # print(array)
+                # print(prob_array)
                 move_index = random.choices(range(len(all_moves)), weights=prob_array)
                 my_move = all_moves[move_index[0]][0]
                 return round(value, 5), my_move

@@ -6,9 +6,9 @@ from classes.GameBoard import GameBoard
 import numpy as np
 from ai.equal_strategy import equilibrium_strategy
 from ai.helper_functions import *
-from ai.eval import minimax_eval
+from ai.eval import minimax_eval, equilibrium_eval
 
-CUT_OFF_LIMIT = 2
+CUT_OFF_LIMIT = 1
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
@@ -28,12 +28,13 @@ def max_value(state, game, a, b):
     # Apply when tokens are attacking
     val, my_move = equilibrium_strategy(state, game, val)
     if my_move != None:
-        print("equilibrium")
-        print(val)
-        return val, my_move[1:3]
+        if my_move[1] != None:
+            # print(val)
+            # print("equilibrium")
+            return val, my_move[1:3]
 
 
-    print("minimax")
+    #print("minimax")
     val = -inf
     best_moves = []
     #best_eval = -inf
@@ -44,7 +45,7 @@ def max_value(state, game, a, b):
             val, move = a_temp, s[1:3]
             a = max(val, a)
             best_moves = [move]
-        elif a_temp == val:
+        elif val - a_temp < 0.05:
             best_moves.append(s[1:3])
 
         if val >= b:
@@ -79,43 +80,5 @@ def min_value(state, game, a, b):
 
     move = random.choice(best_moves)
     return val, move
-
-# '''
-#     Find all viable moves
-#     try sorting to maximise pruning
-#     return state (game_board)
-# '''
-# def actions(state, my_action):
-#     next_states = []
-
-#     if my_action:
-#         tokens = state.data[state.me]
-#         token_type = state.me # lower
-#     else: 
-#         tokens = state.data[state.opponent]
-#         token_type = state.opponent
-
-#     # Slide and Swing moves
-#     for token in tokens:
-#         player = Token(token, token_type == "upper")
-#         player_actions = player.viable_actions(state, True)
-
-#         for player_action in player_actions:
-#                 new_state = state.apply_action(player, player_action, my_action)
-#                 next_states.append( [new_state, player, player_action])
-
-#     # Throw moves
-#     if state.tokens_in_hand[token_type] > 0:
-#         for hex in throwable_hexes(state, token_type):
-#             for token in ["r", "p", "s"]:
-#                 player = Token([token, None, None], token_type == "upper")
-
-#                 new_state = state.apply_action(player, hex, my_action)
-#                 next_states.append( [new_state, player, hex])
-
-#     # sort for perfect ordering
-#     # next_states.sort(key=lambda x: x[0].eval(), reverse= my_action)
-
-#     return next_states
 
 
