@@ -36,8 +36,6 @@ def defeat_actions(state, my_action):
 
     # Slide and Swing moves
     for player_data in state.data[token_type]:
-        if player_data == state.ignore_token:
-            continue
 
         player = Token(player_data, token_type == "upper")
 
