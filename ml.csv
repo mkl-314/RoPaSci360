@@ -1,5 +1,11 @@
-'current_score', 'tokens_on_board', 'tokens_in_hand', 'future_score'
+'current_score', 'my_tokens_on_board', 'op_tokens_on_board', 'my_tokens_in_hand', 'op_tokens_in_hand', 'future_score'
 0,0,0,0
 0,0,0,0
-0,0,0,0
-0,0,0,0
+0,1,1,0
+0,1,1,0
+0,0,0,9,9,0
+0,0,0,9,9,0
+0,1,1,8,8,0
+0,1,1,8,8,0
+0,2,2,7,7,0
+0,2,2,7,7,0
