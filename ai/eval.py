@@ -1,6 +1,5 @@
 import math 
 from classes.Token import Token
-from moves.throw_move import *
 from ai.helper_functions import *
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
@@ -10,23 +9,23 @@ def minimax_eval(game):
 
     value += 1 * tokens_on_board(game)
     value += 1.1 * tokens_in_hand(game)
-    #value += token_types(game)
-    value += 0.1 * defeat_token_distance(game)
+    if game.turn >= 5:
+        value += 0.05 * defeat_token_distance(game)
+        value += 0.8 * min_attacking_distance(game)
     value += 0.1 * token_board_progression(game)
 
-    value += 0.01 * num_viable_actions(game)
-    value += 0.8 * min_attacking_distance(game)
+    value += 0.1 * num_viable_actions(game)
     return value
 
 
-def equilibrium_eval(new_state, state):
+def equilibrium_eval(new_state):
     
     # Eval based on next state
-    score = tokens_on_board(new_state)
+    score = 1 * tokens_on_board(new_state)
     score += 1.3 * tokens_in_hand(new_state)
-    score += 0.5 * min_attacking_distance(new_state)
-    # score += 0.01 * token_board_progression(new_state)
-    score += 0.1 * num_viable_actions(new_state)
+    #score += 0.5 * min_attacking_distance(new_state)
+    score += 0.05 * defeat_token_distance(new_state)
+    #score += 0.1 * num_viable_actions(new_state)
     score += 10 * invincible_state(new_state)
     score += 100 * win_state(new_state)
 
@@ -38,30 +37,6 @@ def tokens_on_board(game):
 
 def tokens_in_hand(game):
     return ((game.tokens_in_hand[game.me]) - (game.tokens_in_hand[game.opponent]))
-
-
-# Ensure my token can defeat any of opponents tokens
-def token_types(game):
-
-
-    my_symbols = {"r": 0, "p": 0, "s": 0}
-    op_symbols = {"r": 0, "p": 0, "s": 0}
-    value = 0
-    for my_data in game.data[game.me]:
-        my_symbols[my_data[0]] += 1
-
-
-    for opponent_data in game.data[game.opponent]:
-        op_symbols[opponent_data[0]] += 1
-    
-    for token_type in ["r", "p", "s"]:
-        if my_symbols[token_type] > 0 and op_symbols[_DEFEATS[token_type]] > 0:
-            value += game.w3
-        
-        if my_symbols[token_type] > 0 and op_symbols[_DEFEATED_BY[token_type]] > 0:
-            value -= game.w4
-
-    return value
 
 # Prioritises tokens being closer to initial row
 def token_board_progression(game):
@@ -81,17 +56,6 @@ def token_board_progression(game):
         distance = abs(my_initial_row - my_data[1])
         if distance < 5:
             value += 8 - distance
-        elif no_attacking_token and distance >= 5:
-            no_attacking_token = False
-            value += 8
-        elif not no_attacking_token and distance >= 5:
-            value += 1
-
-    no_attacking_token = True
-    for op_data in game.data[game.opponent]: 
-        distance = abs(my_initial_row - my_data[1])
-        if distance < 5:
-            value -= 8 - distance
         elif no_attacking_token and distance >= 5:
             no_attacking_token = False
             value += 8
@@ -126,7 +90,10 @@ def defeat_token_distance(game):
                             min_distance = distance
 
                 if min_distance != math.inf:
-                    value += 8 - min_distance
+                    if min_distance == 1:
+                        value += 10
+                    else:
+                        value += 8-min_distance
             
             return value / len(game.data[enemy])
         
@@ -154,26 +121,6 @@ def num_viable_actions(game_board):
             value -= 1
 
         my_symbols[my_token.symbol] += 1
-
-
-    for opponent_data in game_board.data[game_board.opponent]:
-        op_token = Token(opponent_data, game_board.me == "upper")
-        # value -= 0.001 * len(op_token.viable_actions(game_board, True))
-
-        op_symbols[op_token.symbol] += 1
-
-    
-
-    
-    # Evaluate token symbols compared to opponents
-    for (symbol, num) in op_symbols.items():
-        if num > 0:
-            if my_symbols[_DEFEATED_BY[symbol]] > 0:
-                value += 1
-            
-            # if my_symbols[_DEFEATS[symbol]] > 0:
-            #     value -= 0.1
-
         
     return value
 

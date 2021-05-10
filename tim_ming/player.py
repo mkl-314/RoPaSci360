@@ -1,9 +1,10 @@
 
 from classes.GameBoard import GameBoard
-from moves.throw_move import *
 from ai.sim_minimax import *
+import copy
 
-
+_DEFEATS = {"r": "s", "p": "r", "s": "p"}
+_DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 
 class Player:
     def __init__(self, player):
@@ -18,6 +19,8 @@ class Player:
         self.player = player
         self.turn = 0
         self.game_board = GameBoard(player)
+        self.past_states = []
+        self.repeated_state = False
 
     def action(self):
         """
@@ -38,5 +41,5 @@ class Player:
         The parameter opponent_action is the opponent's chosen action,
         and player_action is this instance's latest chosen action.
         """
-        self.game_board.update(player_action, opponent_action)
 
+        self.game_board.update(player_action, opponent_action)
