@@ -9,4 +9,7 @@ COMP30024 Game
 - Improve minimax to account for probability
 - Optimise alg
 
-
+Logic:
+- Always run away, unless we can take more pieces than we can lose
+- Always take if we are not going to lose a piece - no down side
+- If we can be taken, hide within a piece with the same symbol

@@ -1,7 +1,8 @@
 #from util import print_board
 import re
 import copy
-from ai.path_searching import eval_tokens_on_board
+#from ai.path_searching import eval
+import random
 
 class GameBoard(object):
     token_defeats = ["r", "s", "p"]
@@ -12,8 +13,16 @@ class GameBoard(object):
         self.opponent = "lower" if self.me == "upper" else "upper"
         self.board_dict = {}
         self.data = {"upper": [], "lower": []} 
-        self.tokens_in_hand = {"upper": 9, "lower": 9}     
+        self.tokens_in_hand = {"upper": 9, "lower": 9} 
     
+    def __eq__(self, gameboard):
+        return self.tokens_in_hand == gameboard.tokens_in_hand and self.data == gameboard.data
+
+    def possible_same_state(self, gameboard):
+        return self.tokens_in_hand == gameboard.tokens_in_hand and \
+            len(self.data["upper"]) == len(gameboard.data["upper"]) and \
+                len(self.data["lower"]) == len(gameboard.data["lower"])
+
     # formats gameboard data by hex
     def update_board(self, data):
         board_dict = {}
@@ -100,6 +109,16 @@ class GameBoard(object):
 
         self.data = self.convert_to_data(self.board_dict)
 
+        return copy.deepcopy(self)
+
+    def update_copy(self, my_action, opponent_action):
+        new_game_board = copy.deepcopy(self)
+        new_game_board.update(my_action, opponent_action)
+        return new_game_board
+
+
+
+
     # Updates the token position
     def update_token(self, player, player_action):
 
@@ -112,16 +131,6 @@ class GameBoard(object):
                     if upper[1:3] == list(player_action[1]):
                         upper[1:3] = list(player_action[2])
                         break
-
-    # Evaluate the value that the state has
-    # count my tokens to their tokens + positioning + location
-    # Heuristics? - using would mean halving distance as swing moves may occur
-    def eval(self):
-        value = len(self.data[self.me]) - len(self.data[self.opponent])
-        value += (self.tokens_in_hand[self.me]) - (self.tokens_in_hand[self.opponent])
-
-        value += eval_tokens_on_board(self)
-        return value
 
     def split_token_symbols(self):
         self.my_tokens = {}
