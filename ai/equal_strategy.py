@@ -69,15 +69,11 @@ def defeat_actions(state, my_action):
                     running_states = running_away_actions(player, state, my_action)
                     next_states.extend(running_states)
 
-    # sort for perfect ordering
-    # next_states.sort(key=lambda x: x[0].eval(), reverse= my_action)
-
     return next_states
 
 def running_away_actions(player, state, my_action, get_action=True):
     next_states = []
     player_actions = player.viable_actions(state, True)
-    #next_states.append([None, player, player_actions[0]])
     for player_action in player_actions:
         t_hex = (player_action[0], player_action[1]) 
         if t_hex in state.board_dict:
@@ -190,6 +186,7 @@ def choose_move(state, array=np.array([]), all_moves=[]):
                 # print(prob_array)
                 move_index = random.choices(range(len(all_moves)), weights=prob_array)
                 my_move = all_moves[move_index[0]][0]
+                # print(move_index[0])
                 return round(value, 5), my_move
 
             return value, None
