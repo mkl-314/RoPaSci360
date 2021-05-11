@@ -8,13 +8,11 @@ def minimax_eval(game):
     value = 0
 
     value += 1 * tokens_on_board(game)
-    value += 1.1 * tokens_in_hand(game)
+    value += 1.2 * tokens_in_hand(game)
     if game.turn >= 5:
-        value += 0.05 * defeat_token_distance(game)
-        value += 0.8 * min_attacking_distance(game)
-    value += 0.1 * token_board_progression(game)
-
-    value += 0.1 * num_viable_actions(game)
+        value += 0.45 * min_attacking_distance(game)
+    value += 0.05 * token_board_progression(game)
+    value += 0.16 * num_viable_actions(game)
     return value
 
 
@@ -23,9 +21,8 @@ def equilibrium_eval(new_state):
     # Eval based on next state
     score = 1 * tokens_on_board(new_state)
     score += 1.3 * tokens_in_hand(new_state)
-    #score += 0.5 * min_attacking_distance(new_state)
-    score += 0.05 * defeat_token_distance(new_state)
-    #score += 0.1 * num_viable_actions(new_state)
+    score += 0.45 * min_attacking_distance(new_state)
+    score += 0.16 * num_viable_actions(new_state)
     score += 10 * invincible_state(new_state)
     score += 100 * win_state(new_state)
 
@@ -56,7 +53,7 @@ def token_board_progression(game):
         distance = abs(my_initial_row - my_data[1])
         if distance < 5:
             value += 8 - distance
-        elif no_attacking_token and distance >= 5:
+        elif no_attacking_token and distance  >= 5:
             no_attacking_token = False
             value += 8
         elif not no_attacking_token and distance >= 5:
