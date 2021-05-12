@@ -1,4 +1,4 @@
-from classes.Token import Token
+from Ti_Ming.classes.Token import Token
 
 def heuristic(token1, token2):
     # Difference in row (negative)

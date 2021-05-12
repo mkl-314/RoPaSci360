@@ -1,1 +1,1 @@
-from tim_ming.player import Player
+from Ti_Ming.player import Player

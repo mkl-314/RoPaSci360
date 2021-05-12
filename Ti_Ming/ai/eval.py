@@ -1,6 +1,6 @@
 import math 
-from classes.Token import Token
-from ai.helper_functions import *
+from Ti_Ming.classes.Token import Token
+from Ti_Ming.ai.helper_functions import *
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
 _DEFEATED_BY = {"r": "p", "p": "s", "s": "r"}
 

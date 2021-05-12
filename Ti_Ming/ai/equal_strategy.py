@@ -1,12 +1,11 @@
-from classes.Token import Token
+from Ti_Ming.classes.Token import Token
 from math import inf
 import random
-from gametheory import solve_game
-from classes.GameBoard import GameBoard
+from Ti_Ming.ai.gametheory import solve_game
+from Ti_Ming.classes.GameBoard import GameBoard
 import numpy as np
-from ai.helper_functions import *
-from ai.eval import *
-import copy
+from Ti_Ming.ai.helper_functions import *
+from Ti_Ming.ai.eval import *
 
 E_CUT_OFF_LIMIT = 0
 

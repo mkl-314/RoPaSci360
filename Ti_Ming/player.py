@@ -1,6 +1,6 @@
 
-from classes.GameBoard import GameBoard
-from ai.sim_minimax import *
+from Ti_Ming.classes.GameBoard import GameBoard
+from Ti_Ming.ai.sim_minimax import *
 import copy
 
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}

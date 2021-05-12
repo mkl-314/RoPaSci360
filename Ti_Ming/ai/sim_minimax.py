@@ -1,12 +1,9 @@
-from classes.Token import Token
+
 from math import inf
 import random
-from gametheory import solve_game
-from classes.GameBoard import GameBoard
-import numpy as np
-from ai.equal_strategy import equilibrium_strategy
-from ai.helper_functions import *
-from ai.eval import minimax_eval, equilibrium_eval
+from Ti_Ming.ai.equal_strategy import equilibrium_strategy
+from Ti_Ming.ai.helper_functions import *
+from Ti_Ming.ai.eval import minimax_eval
 
 CUT_OFF_LIMIT = 1
 _DEFEATS = {"r": "s", "p": "r", "s": "p"}
