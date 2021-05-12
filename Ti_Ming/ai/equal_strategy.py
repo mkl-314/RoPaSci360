@@ -1,5 +1,4 @@
 from Ti_Ming.classes.Token import Token
-from math import inf
 import random
 from Ti_Ming.ai.gametheory import solve_game
 from Ti_Ming.classes.GameBoard import GameBoard
