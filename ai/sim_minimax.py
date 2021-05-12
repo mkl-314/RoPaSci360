@@ -29,8 +29,7 @@ def max_value(state, game, a, b):
     val, my_move = equilibrium_strategy(state, game, val)
     if my_move != None:
         if my_move[1] != None:
-            # print(val)
-            # print("equilibrium")
+
             return val, my_move[1:3]
 
 

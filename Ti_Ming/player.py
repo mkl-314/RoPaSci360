@@ -29,7 +29,6 @@ class Player:
         """
         self.turn += 1
         move = minimax_manager(self.game_board)
-
         return move[0].do_action(move[1])
 
     
